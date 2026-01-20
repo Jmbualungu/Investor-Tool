@@ -10,11 +10,13 @@ import SwiftUI
 struct FirstLaunchOnboardingView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("marketingMode") private var marketingMode = false
+    @StateObject private var disclaimerManager = DisclaimerManager()
     @State private var currentPage = 0
     @State private var titleLongPressStartTime: Date?
     let onComplete: () -> Void
     
-    private let totalPages = 3
+    // Total pages: 1 disclaimer + 3 content pages = 4
+    private let totalPages = 4
     
     var body: some View {
         ZStack {
@@ -24,33 +26,39 @@ struct FirstLaunchOnboardingView: View {
                 .allowsHitTesting(false)
             
             VStack(spacing: 0) {
-                // Top bar with Skip button
-                HStack {
-                    Spacer()
-                    
-                    Button {
-                        HapticManager.shared.impact(style: .light)
-                        completeOnboarding()
-                    } label: {
-                        Text("Skip")
-                            .font(DSTypography.body)
-                            .fontWeight(.semibold)
-                            .foregroundColor(DSColors.accent)
+                // Top bar with Skip button (hide on disclaimer page)
+                if currentPage > 0 {
+                    HStack {
+                        Spacer()
+                        
+                        Button {
+                            HapticManager.shared.impact(style: .light)
+                            completeOnboarding()
+                        } label: {
+                            Text("Skip")
+                                .font(DSTypography.body)
+                                .fontWeight(.semibold)
+                                .foregroundColor(DSColors.accent)
+                        }
+                        .padding(.trailing, DSSpacing.l)
+                        .padding(.top, DSSpacing.m)
                     }
-                    .padding(.trailing, DSSpacing.l)
-                    .padding(.top, DSSpacing.m)
+                    .transition(.opacity)
                 }
                 
                 // TabView with pages
                 TabView(selection: $currentPage) {
-                    page1
+                    disclaimerPage
                         .tag(0)
                     
-                    page2
+                    page1
                         .tag(1)
                     
-                    page3
+                    page2
                         .tag(2)
+                    
+                    page3
+                        .tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(Motion.screenTransition, value: currentPage)
@@ -60,71 +68,93 @@ struct FirstLaunchOnboardingView: View {
                     .padding(.vertical, DSSpacing.l)
                 
                 // Bottom controls (Back + Next/Start)
-                VStack(spacing: DSSpacing.s) {
-                    // Micro hint on page 2
-                    if currentPage == 1 {
-                        Text("You can adjust assumptions anytime.")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(DSColors.textTertiary)
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
-                    
-                    HStack(spacing: DSSpacing.m) {
-                        // Back button
-                        if currentPage > 0 {
-                            Button {
-                                HapticManager.shared.impact(style: .light)
-                                Motion.withAnimation(Motion.screenTransition) {
-                                    currentPage -= 1
-                                }
-                            } label: {
-                                HStack(spacing: DSSpacing.s) {
-                                    Image(systemName: "chevron.left")
-                                        .font(.system(size: 14, weight: .semibold))
-                                    Text("Back")
-                                }
-                                .fontWeight(.semibold)
-                            }
-                            .secondaryCTAStyle()
-                            .pressableScale()
-                            .transition(.opacity.combined(with: .move(edge: .leading)))
+                // Hide on disclaimer page (disclaimer has its own button)
+                if currentPage > 0 {
+                    VStack(spacing: DSSpacing.s) {
+                        // Micro hint on page 2
+                        if currentPage == 2 {
+                            Text("You can adjust assumptions anytime.")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(DSColors.textTertiary)
+                                .transition(.opacity.combined(with: .move(edge: .top)))
                         }
                         
-                        // Next or Start button
-                        if currentPage == totalPages - 1 {
-                            Button {
-                                HapticManager.shared.impact(style: .medium)
-                                completeOnboarding()
-                            } label: {
-                                Text("Start")
+                        HStack(spacing: DSSpacing.m) {
+                            // Back button (hide if on first content page after disclaimer)
+                            if currentPage > 1 {
+                                Button {
+                                    HapticManager.shared.impact(style: .light)
+                                    Motion.withAnimation(Motion.screenTransition) {
+                                        currentPage -= 1
+                                    }
+                                } label: {
+                                    HStack(spacing: DSSpacing.s) {
+                                        Image(systemName: "chevron.left")
+                                            .font(.system(size: 14, weight: .semibold))
+                                        Text("Back")
+                                    }
                                     .fontWeight(.semibold)
-                            }
-                            .primaryCTAStyle()
-                            .shimmerOverlay(enabled: true)
-                            .pressableScale()
-                            .transition(.opacity.combined(with: .move(edge: .trailing)))
-                        } else {
-                            Button {
-                                HapticManager.shared.impact(style: .light)
-                                Motion.withAnimation(Motion.screenTransition) {
-                                    currentPage += 1
                                 }
-                            } label: {
-                                HStack(spacing: DSSpacing.s) {
-                                    Text("Next")
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 14, weight: .semibold))
-                                }
-                                .fontWeight(.semibold)
+                                .secondaryCTAStyle()
+                                .pressableScale()
+                                .transition(.opacity.combined(with: .move(edge: .leading)))
                             }
-                            .primaryCTAStyle()
-                            .shimmerOverlay(enabled: true)
-                            .pressableScale()
+                            
+                            // Next or Start button
+                            if currentPage == totalPages - 1 {
+                                Button {
+                                    HapticManager.shared.impact(style: .medium)
+                                    completeOnboarding()
+                                } label: {
+                                    Text("Start")
+                                        .fontWeight(.semibold)
+                                }
+                                .primaryCTAStyle()
+                                .shimmerOverlay(enabled: true)
+                                .pressableScale()
+                                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                            } else {
+                                Button {
+                                    HapticManager.shared.impact(style: .light)
+                                    Motion.withAnimation(Motion.screenTransition) {
+                                        currentPage += 1
+                                    }
+                                } label: {
+                                    HStack(spacing: DSSpacing.s) {
+                                        Text("Next")
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                    .fontWeight(.semibold)
+                                }
+                                .primaryCTAStyle()
+                                .shimmerOverlay(enabled: true)
+                                .pressableScale()
+                            }
                         }
                     }
+                    .padding(.horizontal, DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
+                    .transition(.opacity)
                 }
-                .padding(.horizontal, DSSpacing.l)
-                .padding(.bottom, DSSpacing.xl)
+            }
+        }
+        .navigationBarHidden(true)
+        .onAppear {
+            // Skip disclaimer if already accepted
+            if disclaimerManager.hasAccepted {
+                currentPage = 1
+            }
+        }
+    }
+    
+    // MARK: - Disclaimer Page
+    
+    private var disclaimerPage: some View {
+        DisclaimerView {
+            // When disclaimer is accepted, advance to next page
+            Motion.withAnimation(Motion.screenTransition) {
+                currentPage = 1
             }
         }
     }
