@@ -4,12 +4,7 @@ import SwiftUI
 import UIKit
 #endif
 
-// MARK: - Quote Model
-private struct InvestorQuote {
-    let text: String
-    let author: String
-}
-
+// MARK: - Quote Model (using shared InvestorQuotes)
 private let INVESTOR_QUOTES: [InvestorQuote] = [
     InvestorQuote(
         text: "Risk comes from not knowing what you're doing.",

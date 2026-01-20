@@ -18,10 +18,30 @@ struct FirstLaunchOnboardingView: View {
     
     var body: some View {
         ZStack {
+            // Background - must not intercept gestures
             AbstractBackground()
                 .ignoresSafeArea()
+                .allowsHitTesting(false)
             
             VStack(spacing: 0) {
+                // Top bar with Skip button
+                HStack {
+                    Spacer()
+                    
+                    Button {
+                        HapticManager.shared.impact(style: .light)
+                        completeOnboarding()
+                    } label: {
+                        Text("Skip")
+                            .font(DSTypography.body)
+                            .fontWeight(.semibold)
+                            .foregroundColor(DSColors.accent)
+                    }
+                    .padding(.trailing, DSSpacing.l)
+                    .padding(.top, DSSpacing.m)
+                }
+                
+                // TabView with pages
                 TabView(selection: $currentPage) {
                     page1
                         .tag(0)
@@ -35,44 +55,76 @@ struct FirstLaunchOnboardingView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(Motion.screenTransition, value: currentPage)
                 
-                // Page indicator
-                HStack(spacing: 8) {
-                    ForEach(0..<totalPages, id: \.self) { index in
-                        Capsule()
-                            .fill(currentPage == index ? DSColors.accent : DSColors.textTertiary.opacity(0.3))
-                            .frame(width: currentPage == index ? 24 : 8, height: 8)
-                            .animation(Motion.emphasize, value: currentPage)
-                    }
-                }
-                .padding(.vertical, DSSpacing.l)
+                // Premium progress dots
+                OnboardingProgressDots(currentIndex: currentPage, total: totalPages)
+                    .padding(.vertical, DSSpacing.l)
                 
-                // CTA Button
-                if currentPage == totalPages - 1 {
-                    Button {
-                        completeOnboarding()
-                    } label: {
-                        Text(Copy.startForecasting)
-                            .fontWeight(.semibold)
+                // Bottom controls (Back + Next/Start)
+                VStack(spacing: DSSpacing.s) {
+                    // Micro hint on page 2
+                    if currentPage == 1 {
+                        Text("You can adjust assumptions anytime.")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(DSColors.textTertiary)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
-                    .primaryCTAStyle()
-                    .pressableScale()
-                    .padding(.horizontal, DSSpacing.l)
-                    .padding(.bottom, DSSpacing.xl)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                } else {
-                    Button {
-                        Motion.withAnimation(Motion.screenTransition) {
-                            currentPage += 1
+                    
+                    HStack(spacing: DSSpacing.m) {
+                        // Back button
+                        if currentPage > 0 {
+                            Button {
+                                HapticManager.shared.impact(style: .light)
+                                Motion.withAnimation(Motion.screenTransition) {
+                                    currentPage -= 1
+                                }
+                            } label: {
+                                HStack(spacing: DSSpacing.s) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.system(size: 14, weight: .semibold))
+                                    Text("Back")
+                                }
+                                .fontWeight(.semibold)
+                            }
+                            .secondaryCTAStyle()
+                            .pressableScale()
+                            .transition(.opacity.combined(with: .move(edge: .leading)))
                         }
-                    } label: {
-                        Text(Copy.continueCTA)
-                            .fontWeight(.semibold)
+                        
+                        // Next or Start button
+                        if currentPage == totalPages - 1 {
+                            Button {
+                                HapticManager.shared.impact(style: .medium)
+                                completeOnboarding()
+                            } label: {
+                                Text("Start")
+                                    .fontWeight(.semibold)
+                            }
+                            .primaryCTAStyle()
+                            .shimmerOverlay(enabled: true)
+                            .pressableScale()
+                            .transition(.opacity.combined(with: .move(edge: .trailing)))
+                        } else {
+                            Button {
+                                HapticManager.shared.impact(style: .light)
+                                Motion.withAnimation(Motion.screenTransition) {
+                                    currentPage += 1
+                                }
+                            } label: {
+                                HStack(spacing: DSSpacing.s) {
+                                    Text("Next")
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                                .fontWeight(.semibold)
+                            }
+                            .primaryCTAStyle()
+                            .shimmerOverlay(enabled: true)
+                            .pressableScale()
+                        }
                     }
-                    .secondaryCTAStyle()
-                    .pressableScale()
-                    .padding(.horizontal, DSSpacing.l)
-                    .padding(.bottom, DSSpacing.xl)
                 }
+                .padding(.horizontal, DSSpacing.l)
+                .padding(.bottom, DSSpacing.xl)
             }
         }
     }
@@ -94,9 +146,12 @@ struct FirstLaunchOnboardingView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: DSSpacing.m) {
-                    Text("Build a Forecast")
-                        .font(.system(size: 34, weight: .bold))
-                        .foregroundColor(DSColors.textPrimary)
+                    // Parallax title
+                    ParallaxTitle(
+                        title: "Build a Forecast",
+                        subtitle: nil,
+                        pageIndex: currentPage
+                    )
                     
                     Text("Understand value, not just price.")
                         .font(.system(size: 20, weight: .medium))
@@ -108,6 +163,12 @@ struct FirstLaunchOnboardingView: View {
                         .lineSpacing(6)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                
+                // Preview card (simple)
+                ResultsPreviewCard(variant: .simple)
+                
+                // Quote card
+                QuoteCard(quote: InvestorQuotes.onboarding[0])
             }
             
             Spacer()
@@ -121,34 +182,35 @@ struct FirstLaunchOnboardingView: View {
             Spacer()
             
             VStack(alignment: .leading, spacing: DSSpacing.l) {
-                Text("How it works")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(DSColors.textPrimary)
+                // Parallax title
+                ParallaxTitle(
+                    title: "Control the Drivers",
+                    subtitle: "Change assumptions and see valuation update instantly.",
+                    pageIndex: currentPage
+                )
                 
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
+                VStack(alignment: .leading, spacing: DSSpacing.m) {
                     howItWorksRow(
-                        icon: "building.2",
-                        title: "Choose a company",
-                        description: "Pick any ticker to analyze"
+                        icon: "arrow.up.forward.circle.fill",
+                        title: "Revenue Growth",
+                        description: "Set growth rates and runway"
                     )
                     
                     howItWorksRow(
                         icon: "slider.horizontal.3",
-                        title: "Shape assumptions",
-                        description: "Adjust growth, margins, and risk"
+                        title: "Operating Margins",
+                        description: "Adjust profitability assumptions"
                     )
                     
                     howItWorksRow(
-                        icon: "chart.bar.doc.horizontal",
-                        title: "See valuation & sensitivity",
-                        description: "Understand what drives the numbers"
+                        icon: "chart.bar.doc.horizontal.fill",
+                        title: "Valuation Multiples",
+                        description: "Control discount rate and exit"
                     )
                 }
                 
-                Text("No financial advice. Just structured thinking.")
-                    .font(DSTypography.caption)
-                    .foregroundColor(DSColors.textTertiary)
-                    .padding(.top, DSSpacing.m)
+                // Quote card
+                QuoteCard(quote: InvestorQuotes.onboarding[1])
             }
             
             Spacer()
@@ -162,35 +224,43 @@ struct FirstLaunchOnboardingView: View {
             Spacer()
             
             VStack(alignment: .leading, spacing: DSSpacing.l) {
-                Text("You're in control")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(DSColors.textPrimary)
-                    .onLongPressGesture(minimumDuration: 2.0) {
-                        // Toggle marketing mode on long press (hidden developer feature)
-                        HapticManager.shared.impact(style: .medium)
-                        marketingMode.toggle()
-                        AppLogger.log("Marketing mode toggled: \(marketingMode)", category: .userAction)
-                    }
+                // Parallax title
+                ParallaxTitle(
+                    title: "See the Range",
+                    subtitle: "Explore scenarios and understand what matters most.",
+                    pageIndex: currentPage
+                )
+                .onLongPressGesture(minimumDuration: 2.0) {
+                    // Toggle marketing mode on long press (hidden developer feature)
+                    HapticManager.shared.impact(style: .medium)
+                    marketingMode.toggle()
+                }
                 
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    featureHighlight(
-                        icon: "slider.horizontal.2.square",
-                        title: "Assumption sliders",
-                        description: "Fine-tune every input to match your view"
-                    )
-                    
+                // Preview card (full variant with scenarios)
+                ResultsPreviewCard(variant: .full)
+                
+                VStack(alignment: .leading, spacing: DSSpacing.m) {
                     featureHighlight(
                         icon: "arrow.triangle.branch",
-                        title: "Scenarios",
-                        description: "Compare Bear, Base, and Bull cases instantly"
+                        title: "Bear, Base, and Bull scenarios",
+                        description: "Switch instantly between cases"
                     )
                     
                     featureHighlight(
                         icon: "tablecells",
                         title: "Sensitivity analysis",
-                        description: "See how changes affect valuation"
+                        description: "See how assumptions drive valuation"
+                    )
+                    
+                    featureHighlight(
+                        icon: "square.and.arrow.up",
+                        title: "Save and share (coming soon)",
+                        description: "Export your forecasts"
                     )
                 }
+                
+                // Quote card
+                QuoteCard(quote: InvestorQuotes.onboarding[2])
             }
             
             Spacer()
