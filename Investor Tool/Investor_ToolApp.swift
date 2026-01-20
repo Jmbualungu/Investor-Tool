@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-@main
-struct Investor_ToolApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
+struct Investor_ToolApp {
+    // Deprecated entry point. Use ForecastAIApp instead.
 }
