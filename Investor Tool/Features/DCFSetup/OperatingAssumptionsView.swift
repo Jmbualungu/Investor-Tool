@@ -20,24 +20,27 @@ struct OperatingAssumptionsView: View {
             DSColors.background
                 .ignoresSafeArea()
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    // Summary Card
-                    summaryCard
-                    
-                    // Preset Pills
-                    presetSection
-                    
-                    // Margins Section
-                    marginsSection
-                    
-                    // Reinvestment Section
-                    reinvestmentSection
-                    
-                    // Continue Button
-                    continueButton
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                        // Summary Card
+                        summaryCard
+                        
+                        // Preset Pills
+                        presetSection
+                        
+                        // Margins Section
+                        marginsSection
+                        
+                        // Reinvestment Section
+                        reinvestmentSection
+                    }
+                    .padding(DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                .padding(DSSpacing.l)
+                
+                // Bottom CTA Bar
+                bottomBar
             }
         }
         .premiumFlowChrome(
@@ -380,18 +383,14 @@ struct OperatingAssumptionsView: View {
         .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous))
     }
     
-    // MARK: - Continue Button
+    // MARK: - Bottom Bar
     
-    private var continueButton: some View {
-        Button {
-            HapticManager.shared.impact(style: .light)
-            onContinue()
-        } label: {
-            Text(Copy.continueToValuation)
-                .fontWeight(.semibold)
+    private var bottomBar: some View {
+        DSBottomBar {
+            DSBottomBarPrimaryButton("Valuation Assumptions", icon: "arrow.right") {
+                onContinue()
+            }
         }
-        .primaryCTAStyle()
-        .pressableScale()
     }
 }
 

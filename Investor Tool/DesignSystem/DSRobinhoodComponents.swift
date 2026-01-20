@@ -2,24 +2,44 @@ import SwiftUI
 
 struct DSCard<Content: View>: View {
     let content: Content
+    let padding: CGFloat
+    let hasBorder: Bool
+    let hasShadow: Bool
 
-    init(@ViewBuilder content: () -> Content) {
+    init(
+        padding: CGFloat = DSSpacing.l,
+        hasBorder: Bool = true,
+        hasShadow: Bool = false,
+        @ViewBuilder content: () -> Content
+    ) {
         self.content = content()
+        self.padding = padding
+        self.hasBorder = hasBorder
+        self.hasShadow = hasShadow
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.m) {
             content
         }
-        .padding(DSSpacing.l)
+        .padding(padding)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DSColors.surface2)
+        .background(DSColors.surface)
         .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous)
-                .stroke(DSColors.border, lineWidth: 1)
+            Group {
+                if hasBorder {
+                    RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous)
+                        .stroke(DSColors.border, lineWidth: 1)
+                }
+            }
         )
-        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 4)
+        .shadow(
+            color: hasShadow ? Color.black.opacity(0.15) : Color.clear,
+            radius: hasShadow ? 12 : 0,
+            x: 0,
+            y: hasShadow ? 6 : 0
+        )
     }
 }
 
@@ -174,17 +194,78 @@ struct DSTabBar: View {
 
 struct DSPrimaryButton: View {
     let title: String
+    let icon: String?
     let action: () -> Void
+
+    init(
+        _ title: String,
+        icon: String? = nil,
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.icon = icon
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(DSTypography.headline)
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .frame(height: DSSpacing.buttonHeightStandard)
-                .background(DSColors.accent)
-                .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
+            HStack(spacing: DSSpacing.s) {
+                Text(title)
+                    .fontWeight(.semibold)
+                
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .semibold))
+                }
+            }
+            .font(DSTypography.body)
+            .foregroundColor(.black)
+            .frame(maxWidth: .infinity)
+            .frame(height: DSSpacing.buttonHeightStandard)
+            .background(DSColors.accent)
+            .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+    }
+}
+
+struct DSSecondaryButton: View {
+    let title: String
+    let icon: String?
+    let action: () -> Void
+
+    init(
+        _ title: String,
+        icon: String? = nil,
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.icon = icon
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: DSSpacing.s) {
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                
+                Text(title)
+                    .fontWeight(.semibold)
+            }
+            .font(DSTypography.body)
+            .foregroundColor(DSColors.textPrimary)
+            .frame(maxWidth: .infinity)
+            .frame(height: DSSpacing.buttonHeightStandard)
+            .background(DSColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous)
+                    .stroke(DSColors.border, lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)

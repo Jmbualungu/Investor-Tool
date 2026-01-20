@@ -20,46 +20,36 @@ struct InvestmentLensView: View {
             DSColors.background
                 .ignoresSafeArea()
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    // Title and Microcopy
-                    headerSection
-                    
-                    // Horizon Selector
-                    sectionCard(title: "Time Horizon") {
-                        horizonSelector
-                    }
-                    
-                    // Style Selector
-                    sectionCard(title: "Investment Style") {
-                        styleSelector
-                    }
-                    
-                    // Objective Selector
-                    sectionCard(title: "Investment Objective") {
-                        objectiveSelector
-                    }
-                    
-                    // Preview Card
-                    previewCard
-                    
-                    // CTA Button
-                    Button {
-                        HapticManager.shared.impact(style: .light)
-                        onContinue()
-                    } label: {
-                        HStack {
-                            Text("Choose revenue drivers")
-                                .fontWeight(.semibold)
-                            
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                        // Title and Microcopy
+                        headerSection
+                        
+                        // Horizon Selector
+                        sectionCard(title: "Time Horizon") {
+                            horizonSelector
                         }
+                        
+                        // Style Selector
+                        sectionCard(title: "Investment Style") {
+                            styleSelector
+                        }
+                        
+                        // Objective Selector
+                        sectionCard(title: "Investment Objective") {
+                            objectiveSelector
+                        }
+                        
+                        // Preview Card
+                        previewCard
                     }
-                    .primaryCTAStyle()
-                    .pressableScale()
+                    .padding(DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                .padding(DSSpacing.l)
+                
+                // Bottom CTA Bar
+                bottomBar
             }
         }
         .premiumFlowChrome(
@@ -258,6 +248,16 @@ struct InvestmentLensView: View {
         )
     }
     
+    // MARK: - Bottom Bar
+    
+    private var bottomBar: some View {
+        DSBottomBar {
+            DSBottomBarPrimaryButton("Revenue Drivers", icon: "arrow.right") {
+                onContinue()
+            }
+        }
+    }
+    
     // MARK: - Section Card Helper
     
     private func sectionCard<Content: View>(
@@ -274,9 +274,9 @@ struct InvestmentLensView: View {
         .padding(DSSpacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(DSColors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous)
+            RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous)
                 .stroke(DSColors.border, lineWidth: 1)
         )
     }

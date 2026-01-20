@@ -17,7 +17,7 @@ final class GlobalAppConfig: ObservableObject {
     var safeMode: Bool {
         get {
             if userDefaults.object(forKey: "safeMode") == nil {
-                return true // Default to true
+                return false // Default to false - only enable via Settings toggle
             }
             return userDefaults.bool(forKey: "safeMode")
         }

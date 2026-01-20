@@ -19,34 +19,24 @@ struct CompanyContextView: View {
             DSColors.background
                 .ignoresSafeArea()
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    // Header Card
-                    headerCard
-                    
-                    // About Section
-                    aboutSection
-                    
-                    // Why This Matters
-                    whyThisMattersSection
-                    
-                    // CTA Button
-                    Button {
-                        HapticManager.shared.impact(style: .light)
-                        onContinue()
-                    } label: {
-                        HStack {
-                            Text("Set your investment lens")
-                                .fontWeight(.semibold)
-                            
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                        // Header Card
+                        headerCard
+                        
+                        // About Section
+                        aboutSection
+                        
+                        // Why This Matters
+                        whyThisMattersSection
                     }
-                    .primaryCTAStyle()
-                    .pressableScale()
+                    .padding(DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                .padding(DSSpacing.l)
+                
+                // Bottom CTA Bar
+                bottomBar
             }
         }
         .premiumFlowChrome(
@@ -60,71 +50,49 @@ struct CompanyContextView: View {
     // MARK: - Header Card
     
     private var headerCard: some View {
-        DSCard {
+        VStack(alignment: .leading, spacing: DSSpacing.l) {
+            // Symbol and Name
+            VStack(alignment: .leading, spacing: 6) {
+                Text(ticker.symbol)
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundColor(DSColors.textPrimary)
+                
+                Text(ticker.name)
+                    .font(DSTypography.body)
+                    .foregroundColor(DSColors.textSecondary)
+            }
+            
+            // Price if available
+            if let price = ticker.currentPrice {
+                Text("$\(price, specifier: "%.2f")")
+                    .font(DSTypography.displayNumberSmall)
+                    .foregroundColor(DSColors.textPrimary)
+            }
+            
+            Divider()
+                .background(DSColors.divider)
+            
+            // Metadata Pills
             VStack(alignment: .leading, spacing: DSSpacing.m) {
-                // Symbol and Name
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(ticker.symbol)
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(DSColors.textPrimary)
-                    
-                    Text(ticker.name)
-                        .font(DSTypography.subheadline)
-                        .foregroundColor(DSColors.textSecondary)
+                HStack(spacing: DSSpacing.s) {
+                    DSInlineBadge(ticker.sector, style: .neutral)
+                    DSInlineBadge(ticker.industry, style: .neutral)
                 }
                 
-                // Price if available
-                if let price = ticker.currentPrice {
-                    Text("$\(price, specifier: "%.2f")")
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(DSColors.textPrimary)
-                }
-                
-                Divider()
-                    .background(DSColors.border)
-                
-                // Metadata
-                VStack(alignment: .leading, spacing: DSSpacing.s) {
-                    metadataRow(
-                        label: "Sector",
-                        value: ticker.sector
-                    )
-                    
-                    metadataRow(
-                        label: "Industry",
-                        value: ticker.industry
-                    )
-                    
-                    metadataRow(
-                        label: "Market Cap",
-                        value: ticker.marketCapTier.displayName
-                    )
-                }
-                
-                // Business Model Pill
-                HStack {
-                    Text("Business Model")
-                        .font(DSTypography.caption)
-                        .foregroundColor(DSColors.textSecondary)
-                    
-                    Spacer()
-                    
-                    Text(ticker.businessModel.displayName)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(
-                            LinearGradient(
-                                colors: [DSColors.accent, DSColors.accent.opacity(0.8)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
+                HStack(spacing: DSSpacing.s) {
+                    DSInlineBadge(ticker.marketCapTier.displayName, style: .accent)
+                    DSInlineBadge(ticker.businessModel.displayName, style: .accent)
                 }
             }
         }
+        .padding(DSSpacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DSColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusXLarge, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: DSSpacing.radiusXLarge, style: .continuous)
+                .stroke(DSColors.border, lineWidth: 1)
+        )
     }
     
     // MARK: - About Section
@@ -206,6 +174,16 @@ struct CompanyContextView: View {
             RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous)
                 .stroke(DSColors.border, lineWidth: 1)
         )
+    }
+    
+    // MARK: - Bottom Bar
+    
+    private var bottomBar: some View {
+        DSBottomBar {
+            DSBottomBarPrimaryButton("Set Investment Lens", icon: "arrow.right") {
+                onContinue()
+            }
+        }
     }
     
     // MARK: - Helper Views

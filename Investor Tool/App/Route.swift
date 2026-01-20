@@ -14,4 +14,13 @@ enum Route: Hashable {
     case tickerSearch
     case assumptions
     case forecast
+    
+    // DCF Flow routes
+    case companyContext
+    case investmentLens
+    case revenueDrivers
+    case operatingAssumptions
+    case valuationAssumptions
+    case valuationResults
+    case sensitivity
 }

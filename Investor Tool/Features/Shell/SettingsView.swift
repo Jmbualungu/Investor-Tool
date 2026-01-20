@@ -2,8 +2,10 @@ import SwiftUI
 import SwiftData
 
 struct SettingsView: View {
+    @EnvironmentObject private var config: GlobalAppConfig
     @StateObject private var disclaimerManager = DisclaimerManager()
     @State private var showResetAlert = false
+    @State private var showResetFlagsAlert = false
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
@@ -109,6 +111,25 @@ struct SettingsView: View {
                                     .dsHeadline()
                             }
                             
+                            Divider()
+                                .background(DSColors.border)
+                            
+                            // Safe Mode Toggle
+                            Toggle(isOn: $config.safeMode) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Safe Mode")
+                                        .font(DSTypography.body)
+                                        .foregroundColor(DSColors.textPrimary)
+                                    Text("Uses sample data instead of live API calls")
+                                        .font(DSTypography.caption)
+                                        .foregroundColor(DSColors.textSecondary)
+                                }
+                            }
+                            .tint(DSColors.accent)
+                            
+                            Divider()
+                                .background(DSColors.border)
+                            
                             Button(action: {
                                 showResetAlert = true
                             }) {
@@ -127,6 +148,27 @@ struct SettingsView: View {
                             Text("Status: \(disclaimerManager.hasAccepted ? "✓ Accepted" : "✗ Not Accepted")")
                                 .dsCaption()
                                 .foregroundColor(disclaimerManager.hasAccepted ? DSColors.success : DSColors.textSecondary)
+                            
+                            Divider()
+                                .background(DSColors.border)
+                            
+                            Button(action: {
+                                showResetFlagsAlert = true
+                            }) {
+                                HStack {
+                                    Text("Reset All Flags")
+                                        .font(DSTypography.body)
+                                        .foregroundColor(DSColors.danger)
+                                    Spacer()
+                                    Image(systemName: "arrow.counterclockwise.circle")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(DSColors.danger)
+                                }
+                                .padding(.vertical, DSSpacing.xs)
+                            }
+                            
+                            Text("Resets onboarding and safe mode flags")
+                                .dsCaption()
                         }
                     }
                     #endif
@@ -144,11 +186,21 @@ struct SettingsView: View {
         } message: {
             Text("This will reset the financial disclaimer acceptance. You'll need to accept it again on next app launch.")
         }
+        .alert("Reset All Flags", isPresented: $showResetFlagsAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                config.hasSeenOnboarding = false
+                config.safeMode = false
+            }
+        } message: {
+            Text("This will reset onboarding and safe mode flags. The app will restart to the onboarding screen.")
+        }
     }
 }
 
 #Preview {
     NavigationStack {
         SettingsView()
+            .environmentObject(GlobalAppConfig())
     }
 }

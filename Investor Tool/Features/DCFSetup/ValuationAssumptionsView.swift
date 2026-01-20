@@ -26,29 +26,32 @@ struct ValuationAssumptionsView: View {
             DSColors.background
                 .ignoresSafeArea()
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    // Header
-                    headerSection
-                    
-                    // Mode Selector
-                    modeSelector
-                    
-                    // Basic Controls
-                    basicControlsCard
-                    
-                    // Advanced Controls (if selected)
-                    if selectedMode == .advanced {
-                        advancedControlsCard
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                        // Header
+                        headerSection
+                        
+                        // Mode Selector
+                        modeSelector
+                        
+                        // Basic Controls
+                        basicControlsCard
+                        
+                        // Advanced Controls (if selected)
+                        if selectedMode == .advanced {
+                            advancedControlsCard
+                        }
+                        
+                        // Educational Disclosures
+                        educationalSection
                     }
-                    
-                    // Educational Disclosures
-                    educationalSection
-                    
-                    // Continue Button
-                    continueButton
+                    .padding(DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                .padding(DSSpacing.l)
+                
+                // Bottom CTA Bar
+                bottomBar
             }
         }
         .premiumFlowChrome(
@@ -416,18 +419,14 @@ struct ValuationAssumptionsView: View {
         .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous))
     }
     
-    // MARK: - Continue Button
+    // MARK: - Bottom Bar
     
-    private var continueButton: some View {
-        Button {
-            HapticManager.shared.impact(style: .light)
-            onContinue()
-        } label: {
-            Text(Copy.viewValuation)
-                .fontWeight(.semibold)
+    private var bottomBar: some View {
+        DSBottomBar {
+            DSBottomBarPrimaryButton("View Valuation", icon: "arrow.right") {
+                onContinue()
+            }
         }
-        .primaryCTAStyle()
-        .pressableScale()
     }
 }
 

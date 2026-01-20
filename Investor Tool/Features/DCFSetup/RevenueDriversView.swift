@@ -18,21 +18,24 @@ struct RevenueDriversView: View {
             DSColors.background
                 .ignoresSafeArea()
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    // Top-line Revenue Card
-                    revenueIndexCard
-                    
-                    // Preset Toggles
-                    presetToggles
-                    
-                    // Revenue Drivers
-                    driversSection
-                    
-                    // Action Buttons
-                    actionButtons
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                        // Top-line Revenue Card
+                        revenueIndexCard
+                        
+                        // Preset Toggles
+                        presetToggles
+                        
+                        // Revenue Drivers
+                        driversSection
+                    }
+                    .padding(DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                .padding(DSSpacing.l)
+                
+                // Bottom CTA Bar
+                bottomBar
             }
         }
         .premiumFlowChrome(
@@ -52,36 +55,38 @@ struct RevenueDriversView: View {
     // MARK: - Revenue Index Card
     
     private var revenueIndexCard: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.s) {
+        VStack(alignment: .leading, spacing: DSSpacing.m) {
             Text("Top-line Revenue (Indexed)")
-                .font(DSTypography.subheadline)
+                .font(DSTypography.caption)
                 .foregroundColor(DSColors.textSecondary)
+                .textCase(.uppercase)
+                .tracking(0.5)
             
             Text(String(format: "%.0f", flowState.derivedTopLineRevenue))
-                .font(.system(size: 48, weight: .bold))
+                .font(DSTypography.displayNumberMedium)
                 .foregroundColor(DSColors.textPrimary)
                 .animation(Motion.emphasize, value: flowState.derivedTopLineRevenue)
             
-            Text("Moves with the drivers below")
+            Text("Updates live as you adjust drivers below")
                 .font(DSTypography.caption)
                 .foregroundColor(DSColors.textTertiary)
         }
-        .padding(DSSpacing.l)
+        .padding(DSSpacing.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             LinearGradient(
                 colors: [
-                    DSColors.accent.opacity(0.2),
-                    DSColors.accent.opacity(0.05)
+                    DSColors.accent.opacity(0.12),
+                    DSColors.accent.opacity(0.04)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         )
-        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusXLarge, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous)
-                .stroke(DSColors.accent.opacity(0.4), lineWidth: 1.5)
+            RoundedRectangle(cornerRadius: DSSpacing.radiusXLarge, style: .continuous)
+                .stroke(DSColors.accent.opacity(0.3), lineWidth: 1.5)
         )
     }
     
@@ -172,9 +177,9 @@ struct RevenueDriversView: View {
         let driver = flowState.revenueDrivers[index]
         let isDrifted = flowState.isRevenueDriverDrifted(driverID: driver.id)
         
-        return VStack(alignment: .leading, spacing: DSSpacing.m) {
+        return VStack(alignment: .leading, spacing: DSSpacing.l) {
             // Title and Subtitle
-            HStack(alignment: .top, spacing: DSSpacing.xs) {
+            HStack(alignment: .top, spacing: DSSpacing.s) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(driver.title)
                         .font(DSTypography.headline)
@@ -185,23 +190,24 @@ struct RevenueDriversView: View {
                         .foregroundColor(DSColors.textSecondary)
                 }
                 
+                Spacer(minLength: DSSpacing.m)
+                
                 if isDrifted {
-                    DriftDot()
-                        .padding(.top, 4)
+                    DSInlineBadge.edited()
                 }
             }
             
-            // Value Display
+            // Value Display (Large)
             HStack {
                 Spacer()
                 Text(driver.unit.format(driver.value))
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 28, weight: .bold, design: .rounded).monospacedDigit())
                     .foregroundColor(DSColors.accent)
                     .animation(.easeInOut(duration: 0.2), value: driver.value)
             }
             
             // Slider
-            VStack(spacing: DSSpacing.xs) {
+            VStack(spacing: DSSpacing.s) {
                 Slider(
                     value: Binding(
                         get: { driver.value },
@@ -217,58 +223,40 @@ struct RevenueDriversView: View {
                 // Min/Max Labels
                 HStack {
                     Text(driver.unit.format(driver.min))
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(DSColors.textTertiary)
                     
                     Spacer()
                     
                     Text(driver.unit.format(driver.max))
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(DSColors.textTertiary)
                 }
             }
         }
         .padding(DSSpacing.l)
         .background(DSColors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous)
-                .stroke(DSColors.border, lineWidth: 1)
+            RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous)
+                .stroke(isDrifted ? DSColors.accent.opacity(0.3) : DSColors.border, lineWidth: 1)
         )
     }
     
-    // MARK: - Action Buttons
+    // MARK: - Bottom Bar
     
-    private var actionButtons: some View {
-        VStack(spacing: DSSpacing.m) {
-            // Reset Button
-            Button {
-                HapticManager.shared.impact(style: .light)
+    private var bottomBar: some View {
+        DSBottomBar {
+            DSBottomBarPrimaryButton("Operating Assumptions", icon: "arrow.right") {
+                onContinue()
+            }
+        } secondary: {
+            DSBottomBarSecondaryButton("Reset to defaults", icon: "arrow.counterclockwise") {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                     selectedPreset = .consensus
                     flowState.applyPreset(.consensus)
                 }
-            } label: {
-                HStack {
-                    Image(systemName: "arrow.counterclockwise")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text("Reset to defaults")
-                        .fontWeight(.semibold)
-                }
             }
-            .secondaryCTAStyle()
-            .pressableScale()
-            
-            // Continue Button
-            Button {
-                HapticManager.shared.impact(style: .light)
-                onContinue()
-            } label: {
-                Text("Continue to Operating Assumptions →")
-                    .fontWeight(.semibold)
-            }
-            .primaryCTAStyle()
-            .pressableScale()
         }
     }
     

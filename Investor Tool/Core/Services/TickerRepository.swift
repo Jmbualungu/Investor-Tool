@@ -606,6 +606,12 @@ class TickerRepository {
         Array(allTickers.prefix(10))
     }
     
+    // MARK: - Lookup
+    
+    func findTicker(bySymbol symbol: String) -> DCFTicker? {
+        return allTickers.first { $0.symbol.uppercased() == symbol.uppercased() }
+    }
+    
     // MARK: - Search
     
     func search(query: String) -> [DCFTicker] {

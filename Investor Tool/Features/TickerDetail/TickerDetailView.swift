@@ -383,7 +383,7 @@ struct TickerDetailView: View {
                 }
                 .padding(.horizontal, DSSpacing.l)
 
-                DSPrimaryButton(title: "Trade") {}
+                DSPrimaryButton("Trade") {}
                     .padding(.horizontal, DSSpacing.l)
                     .padding(.bottom, DSSpacing.s)
 

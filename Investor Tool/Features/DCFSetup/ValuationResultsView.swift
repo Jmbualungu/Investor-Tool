@@ -16,6 +16,7 @@ struct ValuationResultsView: View {
     @State private var showScenarioSheet = false
     @State private var showSummaryCardSheet = false
     @State private var showScenarioToast = false
+    @State private var selectedPriceRange: PriceRange = .oneDay
     
     let onShowSensitivity: () -> Void
     
@@ -64,40 +65,51 @@ struct ValuationResultsView: View {
     
     var body: some View {
         ZStack {
-            AbstractBackground()
+            DSColors.background
                 .ignoresSafeArea()
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    // Quick Jump Bar
-                    quickJumpBar
-                    
-                    // Hero Card with Sparkline
-                    heroCard
-                    
-                    // Confidence Dial
-                    confidenceDial
-                    
-                    // Scenario Compare
-                    scenarioCompareCard
-                    
-                    // Forecast Name Placeholder
-                    forecastNamePlaceholder
-                    
-                    // Breakdown Card
-                    breakdownCard
-                    
-                    // Assumption Snapshot
-                    assumptionSnapshotCard
-                    
-                    // Action Buttons
-                    actionButtons
-                    
-                    // Financial Disclaimer
-                    disclaimerFooter
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                        // Mini Price Header (Robinhood-style)
+                        if let ticker = flowState.selectedTicker {
+                            PriceHeaderView(
+                                symbol: ticker.symbol,
+                                companyName: ticker.name,
+                                selectedRange: $selectedPriceRange
+                            )
+                        }
+                        
+                        // Quick Jump Bar
+                        quickJumpBar
+                        
+                        // Hero Card with Sparkline
+                        heroCard
+                        
+                        // Confidence Dial
+                        confidenceDial
+                        
+                        // Scenario Compare
+                        scenarioCompareCard
+                        
+                        // Forecast Name Placeholder
+                        forecastNamePlaceholder
+                        
+                        // Breakdown Card
+                        breakdownCard
+                        
+                        // Assumption Snapshot
+                        assumptionSnapshotCard
+                        
+                        // Financial Disclaimer
+                        disclaimerFooter
+                    }
+                    .padding(DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                .padding(DSSpacing.l)
-                .padding(.bottom, DSSpacing.xl)
+                
+                // Bottom CTA Bar
+                bottomBar
             }
         }
         .toast(isPresented: $showScenarioToast, message: "Scenario applied")
@@ -211,87 +223,96 @@ struct ValuationResultsView: View {
     private var heroCard: some View {
         VStack(alignment: .leading, spacing: DSSpacing.l) {
             Text("Intrinsic Value")
-                .font(DSTypography.subheadline)
+                .font(DSTypography.caption)
                 .foregroundColor(DSColors.textSecondary)
+                .textCase(.uppercase)
+                .tracking(0.5)
             
             Text("$\(flowState.derivedIntrinsicValue, specifier: "%.2f")")
-                .font(.system(size: 52, weight: .bold))
+                .font(DSTypography.displayNumber)
                 .foregroundColor(DSColors.textPrimary)
                 .animation(Motion.emphasize, value: flowState.derivedIntrinsicValue)
             
             // Intrinsic Value Sparkline
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text("Projected Trend")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(DSColors.textTertiary)
                 
-                Sparkline(points: intrinsicSparklineData, height: 28)
+                Sparkline(points: intrinsicSparklineData, height: 32)
             }
             
             Divider()
-                .background(DSColors.border)
+                .background(DSColors.divider)
             
             // Current Price & Upside
-            HStack(spacing: DSSpacing.l) {
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: DSSpacing.xl) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Current Price")
                         .font(DSTypography.caption)
                         .foregroundColor(DSColors.textSecondary)
                     
                     Text("$\(flowState.baselineCurrentPrice, specifier: "%.2f")")
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(DSTypography.displayNumberSmall)
                         .foregroundColor(DSColors.textPrimary)
                 }
                 
                 Spacer()
                 
-                VStack(alignment: .trailing, spacing: 4) {
+                VStack(alignment: .trailing, spacing: 6) {
                     Text("Upside")
                         .font(DSTypography.caption)
                         .foregroundColor(DSColors.textSecondary)
                     
-                    Text(String(format: "%+.1f%%", flowState.derivedUpsidePercent))
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(flowState.derivedUpsidePercent >= 0 ? DSColors.accent : .red)
+                    HStack(spacing: 6) {
+                        Text(String(format: "%+.1f%%", flowState.derivedUpsidePercent))
+                            .font(DSTypography.displayNumberSmall)
+                            .foregroundColor(flowState.derivedUpsidePercent >= 0 ? DSColors.positive : DSColors.negative)
+                        
+                        DSInlineBadge(
+                            flowState.derivedUpsidePercent >= 0 ? "↑" : "↓",
+                            style: flowState.derivedUpsidePercent >= 0 ? .positive : .negative
+                        )
+                    }
                 }
             }
             
             Divider()
-                .background(DSColors.border)
+                .background(DSColors.divider)
             
             // Implied CAGR
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Implied CAGR (\(flowState.investmentLens.horizon.displayName))")
                         .font(DSTypography.caption)
                         .foregroundColor(DSColors.textSecondary)
                     
                     Text(String(format: "%+.1f%%", flowState.derivedCAGR))
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 24, weight: .bold, design: .rounded).monospacedDigit())
                         .foregroundColor(DSColors.accent)
                 }
                 
                 Spacer()
             }
         }
-        .padding(DSSpacing.l)
+        .padding(DSSpacing.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             LinearGradient(
                 colors: [
-                    DSColors.accent.opacity(0.25),
-                    DSColors.accent.opacity(0.1)
+                    DSColors.accent.opacity(0.12),
+                    DSColors.accent.opacity(0.04)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         )
-        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusXLarge, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: DSSpacing.radiusLarge, style: .continuous)
-                .stroke(DSColors.accent.opacity(0.5), lineWidth: 2)
+            RoundedRectangle(cornerRadius: DSSpacing.radiusXLarge, style: .continuous)
+                .stroke(DSColors.accent.opacity(0.3), lineWidth: 1.5)
         )
-        .shadow(color: DSColors.accent.opacity(0.2), radius: 16, x: 0, y: 8)
+        .shadow(color: DSColors.accentGlow.opacity(0.15), radius: 20, x: 0, y: 10)
     }
     
     // MARK: - Confidence Dial
@@ -676,111 +697,90 @@ struct ValuationResultsView: View {
         }
     }
     
-    // MARK: - Action Buttons
+    // MARK: - Bottom Bar
     
-    private var actionButtons: some View {
-        VStack(spacing: DSSpacing.m) {
-            // Primary: Sensitivity Analysis
-            Button {
-                HapticManager.shared.impact(style: .light)
+    private var bottomBar: some View {
+        DSBottomBar {
+            DSBottomBarPrimaryButton("Sensitivity Analysis", icon: "arrow.right") {
                 onShowSensitivity()
-            } label: {
-                HStack {
-                    Text("Sensitivity Analysis")
-                        .fontWeight(.semibold)
-                    
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 14, weight: .semibold))
-                }
             }
-            .primaryCTAStyle()
-            .pressableScale()
-            
-            // Changes Button (only visible when drifted)
-            if flowState.hasAnyDrift() {
+        } secondary: {
+            VStack(spacing: DSSpacing.m) {
+                // Changes Button (only visible when drifted)
+                if flowState.hasAnyDrift() {
+                    DSBottomBarSecondaryButton("View Changes", icon: "list.bullet.rectangle") {
+                        showChangesSheet = true
+                    }
+                }
+                
+                // Preview Summary Card Button
                 Button {
                     HapticManager.shared.impact(style: .light)
-                    showChangesSheet = true
+                    showSummaryCardSheet = true
                 } label: {
                     HStack {
-                        Image(systemName: "list.bullet.rectangle")
+                        Image(systemName: "doc.text.image")
                             .font(.system(size: 14, weight: .semibold))
                         
-                        Text("View Changes")
+                        Text("Preview Summary Card")
                             .fontWeight(.semibold)
                     }
                 }
                 .secondaryCTAStyle()
                 .pressableScale()
-            }
-            
-            // Preview Summary Card Button
-            Button {
-                HapticManager.shared.impact(style: .light)
-                showSummaryCardSheet = true
-            } label: {
-                HStack {
-                    Image(systemName: "doc.text.image")
-                        .font(.system(size: 14, weight: .semibold))
-                    
-                    Text("Preview Summary Card")
-                        .fontWeight(.semibold)
-                }
-            }
-            .secondaryCTAStyle()
-            .pressableScale()
-            
-            // Action Bar: Save & Share
-            HStack(spacing: DSSpacing.m) {
-                // Save Button (Disabled)
-                Button {
-                    comingSoonFeature = "Save"
-                    showComingSoonSheet = true
-                } label: {
-                    HStack {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 12, weight: .semibold))
-                        
-                        Text("Save Forecast")
-                            .font(DSTypography.subheadline)
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundColor(DSColors.textTertiary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: DSSpacing.buttonHeightCompact)
-                    .background(DSColors.surface2)
-                    .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous)
-                            .stroke(DSColors.border, lineWidth: 1)
-                    )
-                }
-                .buttonStyle(.plain)
                 
-                // Share Button (Disabled)
-                Button {
-                    comingSoonFeature = "Share"
-                    showComingSoonSheet = true
-                } label: {
-                    HStack {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 12, weight: .semibold))
-                        
-                        Text("Share")
-                            .font(DSTypography.subheadline)
-                            .fontWeight(.semibold)
+                // Action Bar: Save & Share
+                HStack(spacing: DSSpacing.m) {
+                    // Save Button (Disabled)
+                    Button {
+                        comingSoonFeature = "Save"
+                        showComingSoonSheet = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                            
+                            Text("Save")
+                                .font(DSTypography.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(DSColors.textTertiary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: DSSpacing.buttonHeightCompact)
+                        .background(DSColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous)
+                                .stroke(DSColors.border, lineWidth: 1)
+                        )
                     }
-                    .foregroundColor(DSColors.textTertiary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: DSSpacing.buttonHeightCompact)
-                    .background(DSColors.surface2)
-                    .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous)
-                            .stroke(DSColors.border, lineWidth: 1)
-                    )
+                    .buttonStyle(.plain)
+                    
+                    // Share Button (Disabled)
+                    Button {
+                        comingSoonFeature = "Share"
+                        showComingSoonSheet = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 12, weight: .semibold))
+                            
+                            Text("Share")
+                                .font(DSTypography.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(DSColors.textTertiary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: DSSpacing.buttonHeightCompact)
+                        .background(DSColors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous)
+                                .stroke(DSColors.border, lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .sheet(isPresented: $showComingSoonSheet) {

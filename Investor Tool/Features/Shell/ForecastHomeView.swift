@@ -1,19 +1,18 @@
 //
-//  DCFTickerSearchView.swift
+//  ForecastHomeView.swift
 //  Investor Tool
 //
-//  Ticker search screen for DCF Setup Flow
+//  Forecast tab - main entry point for starting DCF valuations
 //
 
 import SwiftUI
 
-struct DCFTickerSearchView: View {
+struct ForecastHomeView: View {
     @EnvironmentObject private var flowState: DCFFlowState
+    @State private var path: [Route] = []
     @State private var searchQuery: String = ""
     @State private var searchResults: [DCFTicker] = []
     @FocusState private var isSearchFocused: Bool
-    
-    let onSelectTicker: (DCFTicker) -> Void
     
     private var repository: TickerRepository {
         TickerRepository.shared
@@ -26,33 +25,59 @@ struct DCFTickerSearchView: View {
     }
     
     var body: some View {
-        ZStack {
-            DSColors.background
-                .ignoresSafeArea()
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    // Search Field
-                    searchField
-                    
-                    // Popular/Results Section
-                    if searchQuery.isEmpty && !isSearchFocused {
-                        popularSection
-                    } else {
-                        resultsSection
+        NavigationStack(path: $path) {
+            ZStack {
+                DSColors.background
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                        // Hero Section
+                        heroSection
+                        
+                        // Search Field
+                        searchField
+                        
+                        // Popular / Results
+                        if searchQuery.isEmpty && !isSearchFocused {
+                            popularSection
+                        } else {
+                            resultsSection
+                        }
                     }
+                    .padding(DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                .padding(DSSpacing.l)
+            }
+            .navigationTitle("Forecast")
+            .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(for: Route.self) { route in
+                routeDestination(for: route)
+            }
+            .onAppear {
+                searchResults = repository.popularTickers
             }
         }
-        .premiumFlowChrome(
-            step: .ticker,
-            flowState: flowState
-        )
-        .navigationTitle("Find a Company")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            searchResults = repository.popularTickers
+    }
+    
+    // MARK: - Hero Section
+    
+    private var heroSection: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.m) {
+            HStack(spacing: DSSpacing.s) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 28, weight: .medium))
+                    .foregroundColor(DSColors.accent)
+                
+                Text("Start a Forecast")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(DSColors.textPrimary)
+            }
+            
+            Text("Build a DCF valuation model for any company. Search below or select from popular tickers.")
+                .font(DSTypography.body)
+                .foregroundColor(DSColors.textSecondary)
+                .lineSpacing(4)
         }
     }
     
@@ -112,7 +137,7 @@ struct DCFTickerSearchView: View {
                             title: ticker.symbol,
                             isSelected: false
                         ) {
-                            onSelectTicker(ticker)
+                            selectTicker(ticker)
                         }
                     }
                 }
@@ -163,7 +188,7 @@ struct DCFTickerSearchView: View {
     private func tickerRow(_ ticker: DCFTicker) -> some View {
         Button {
             HapticManager.shared.impact(style: .light)
-            onSelectTicker(ticker)
+            selectTicker(ticker)
         } label: {
             HStack(spacing: DSSpacing.m) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -180,11 +205,10 @@ struct DCFTickerSearchView: View {
                         .foregroundColor(DSColors.textSecondary)
                         .lineLimit(1)
                     
-                    if let price = ticker.currentPrice {
-                        Text("$\(price, specifier: "%.2f")")
-                            .font(.system(size: 13, weight: .semibold, design: .rounded).monospacedDigit())
-                            .foregroundColor(DSColors.textSecondary)
-                    }
+                    let currentPrice = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
+                    Text(Formatters.formatCurrency(currentPrice))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded).monospacedDigit())
+                        .foregroundColor(DSColors.textSecondary)
                 }
                 
                 Spacer(minLength: DSSpacing.m)
@@ -234,16 +258,63 @@ struct DCFTickerSearchView: View {
         .padding(.vertical, DSSpacing.xl)
     }
     
-    // MARK: - Search Logic
+    // MARK: - Helpers
+    
+    private func selectTicker(_ ticker: DCFTicker) {
+        flowState.selectedTicker = ticker
+        flowState.generateRevenueDrivers()
+        path.append(.companyContext)
+    }
     
     private func performSearch(_ query: String) {
         searchResults = repository.search(query: query)
     }
+    
+    @ViewBuilder
+    private func routeDestination(for route: Route) -> some View {
+        switch route {
+        case .companyContext:
+            if let ticker = flowState.selectedTicker {
+                CompanyContextView(ticker: ticker) {
+                    path.append(.investmentLens)
+                }
+            }
+            
+        case .investmentLens:
+            InvestmentLensView {
+                path.append(.revenueDrivers)
+            }
+            
+        case .revenueDrivers:
+            RevenueDriversView {
+                path.append(.operatingAssumptions)
+            }
+            
+        case .operatingAssumptions:
+            OperatingAssumptionsView {
+                path.append(.valuationAssumptions)
+            }
+            
+        case .valuationAssumptions:
+            ValuationAssumptionsView {
+                path.append(.valuationResults)
+            }
+            
+        case .valuationResults:
+            ValuationResultsView {
+                path.append(.sensitivity)
+            }
+            
+        case .sensitivity:
+            SensitivityAnalysisView()
+            
+        default:
+            EmptyView()
+        }
+    }
 }
 
 #Preview {
-    NavigationStack {
-        DCFTickerSearchView(onSelectTicker: { _ in })
-            .environmentObject(DCFFlowState())
-    }
+    ForecastHomeView()
+        .environmentObject(DCFFlowState())
 }

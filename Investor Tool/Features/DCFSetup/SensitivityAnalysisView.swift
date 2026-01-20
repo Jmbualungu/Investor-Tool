@@ -42,25 +42,31 @@ struct SensitivityAnalysisView: View {
             DSColors.background
                 .ignoresSafeArea()
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: DSSpacing.l) {
-                    // Header
-                    headerSection
-                    
-                    // Mode Selector
-                    modeSelector
-                    
-                    // Content based on mode
-                    if analysisMode == .oneDimensional {
-                        oneDimensionalContent
-                    } else {
-                        twoDimensionalContent
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                        // Header
+                        headerSection
+                        
+                        // Mode Selector
+                        modeSelector
+                        
+                        // Content based on mode
+                        if analysisMode == .oneDimensional {
+                            oneDimensionalContent
+                        } else {
+                            twoDimensionalContent
+                        }
+                        
+                        // Disclaimer
+                        disclaimerFooter
                     }
-                    
-                    // Action Buttons
-                    actionButtons
+                    .padding(DSSpacing.l)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                .padding(DSSpacing.l)
+                
+                // Bottom CTA Bar
+                bottomBar
             }
         }
         .premiumFlowChrome(
@@ -478,28 +484,13 @@ struct SensitivityAnalysisView: View {
         return min(max(intrinsic, 20.0), 800.0)
     }
     
-    // MARK: - Action Buttons
+    // MARK: - Bottom Bar
     
-    private var actionButtons: some View {
-        VStack(spacing: DSSpacing.m) {
-            // Edit Assumptions
-            Button {
-                HapticManager.shared.impact(style: .light)
+    private var bottomBar: some View {
+        DSBottomBar {
+            DSBottomBarPrimaryButton("Back to Valuation", icon: "arrow.left") {
                 dismiss()
-            } label: {
-                HStack {
-                    Image(systemName: "arrow.left")
-                        .font(.system(size: 14, weight: .semibold))
-                    
-                    Text("Edit Assumptions")
-                        .fontWeight(.semibold)
-                }
             }
-            .secondaryCTAStyle()
-            .pressableScale()
-            
-            // Financial Disclaimer
-            disclaimerFooter
         }
     }
     

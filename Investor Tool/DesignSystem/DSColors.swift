@@ -1,37 +1,87 @@
 import SwiftUI
 
 enum DSColors {
-    // Dark theme background colors
-    static let background = Color(red: 0.05, green: 0.06, blue: 0.08)
-    static let surface = Color(red: 0.11, green: 0.12, blue: 0.15)
-    static let surface2 = Color(red: 0.15, green: 0.16, blue: 0.19)
+    // MARK: - Background Colors (Semantic, adapts to light/dark mode)
     
-    // Glass effect colors
-    static let glassOverlay = Color.white.opacity(0.08)
-    static let border = Color.white.opacity(0.12)
+    /// Primary background - deep, calm dark in dark mode
+    static let background = Color(.systemBackground)
     
-    // Text colors
-    static let textPrimary = Color(white: 0.95)
-    static let textSecondary = Color(white: 0.6)
-    static let textTertiary = Color(white: 0.45)
+    /// Elevated surface - cards, sheets
+    static let surface = Color(.secondarySystemBackground)
     
-    // Accent colors
-    static let accent = Color(red: 0.98, green: 0.54, blue: 0.14)
-    static let accentGlow = Color(red: 0.98, green: 0.54, blue: 0.14).opacity(0.28)
-    static let accentPurple = Color(red: 0.56, green: 0.38, blue: 0.98)
-    static let accentPurpleGlow = Color(red: 0.56, green: 0.38, blue: 0.98).opacity(0.28)
-    static let positive = Color(red: 0.20, green: 0.80, blue: 0.45)
-    static let negative = Color(red: 0.96, green: 0.30, blue: 0.35)
+    /// Secondary surface - nested cards, inputs
+    static let surface2 = Color(.tertiarySystemBackground)
     
-    // Semantic colors
+    // MARK: - Dividers & Borders
+    
+    /// Standard border and divider color
+    static let border = Color(.separator)
+    
+    /// Subtle divider (lighter opacity)
+    static let divider = Color(.separator).opacity(0.6)
+    
+    // MARK: - Text Colors (Semantic)
+    
+    /// Primary text color
+    static let textPrimary = Color(.label)
+    
+    /// Secondary text color
+    static let textSecondary = Color(.secondaryLabel)
+    
+    /// Tertiary text color (hints, placeholders)
+    static let textTertiary = Color(.tertiaryLabel)
+    
+    // MARK: - Accent & Brand
+    
+    /// Primary accent color - uses app accent from Assets
+    static let accent = Color.accentColor
+    
+    /// Accent glow for shadows
+    static let accentGlow = Color.accentColor.opacity(0.3)
+    
+    // MARK: - Semantic Colors
+    
+    /// Positive/success color (green)
+    static let positive = Color.green
+    
+    /// Negative/error color (red)
+    static let negative = Color.red
+    
+    /// Success (alias for positive)
     static let success = positive
+    
+    /// Danger (alias for negative)
     static let danger = negative
     
-    // Legacy support (deprecated but kept for compatibility)
+    /// Warning color
+    static let warning = Color.orange
+    
+    // MARK: - Legacy Support (deprecated but kept for compatibility)
+    
+    @available(*, deprecated, renamed: "accent")
     static let primary = accent
+    
+    @available(*, deprecated, renamed: "textSecondary")
     static let secondaryText = textSecondary
+    
+    @available(*, deprecated, renamed: "border")
     static let separator = border
+    
+    @available(*, deprecated, renamed: "surface")
     static let cardBackground = surface
+    
+    @available(*, deprecated, renamed: "surface2")
     static let fieldBackground = surface2
+    
+    @available(*, deprecated, renamed: "surface2")
     static let surfaceSecondary = surface2
+    
+    @available(*, deprecated, message: "Use .ultraThinMaterial instead")
+    static let glassOverlay = Color.white.opacity(0.08)
+    
+    @available(*, deprecated, message: "Use Color.accentColor for purple accent")
+    static let accentPurple = Color(red: 0.56, green: 0.38, blue: 0.98)
+    
+    @available(*, deprecated, message: "Use accentGlow instead")
+    static let accentPurpleGlow = Color(red: 0.56, green: 0.38, blue: 0.98).opacity(0.28)
 }

@@ -63,6 +63,12 @@ struct RootView: View {
             SimpleDetailView(title: "Assumptions")
         case .forecast:
             SimpleDetailView(title: "Forecast")
+        
+        // DCF Flow routes (handled in tab navigation)
+        case .companyContext, .investmentLens, .revenueDrivers,
+             .operatingAssumptions, .valuationAssumptions,
+             .valuationResults, .sensitivity:
+            EmptyView()
         }
     }
 }

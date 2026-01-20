@@ -10,10 +10,12 @@ import SwiftUI
 struct Sparkline: View {
     let points: [Double]
     let height: CGFloat
+    let lineColor: Color
     
-    init(points: [Double], height: CGFloat = 32) {
+    init(points: [Double], height: CGFloat = 32, lineColor: Color = DSColors.accent) {
         self.points = points
         self.height = height
+        self.lineColor = lineColor
     }
     
     var body: some View {
@@ -50,8 +52,8 @@ struct Sparkline: View {
                 .stroke(
                     LinearGradient(
                         colors: [
-                            DSColors.accent.opacity(0.8),
-                            DSColors.accent.opacity(0.6)
+                            lineColor.opacity(0.8),
+                            lineColor.opacity(0.6)
                         ],
                         startPoint: .leading,
                         endPoint: .trailing
