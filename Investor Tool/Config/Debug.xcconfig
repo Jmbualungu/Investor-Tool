@@ -1,0 +1,16 @@
+//
+//  Debug.xcconfig
+//  Investor Tool
+//
+//  Configuration for Debug builds
+//
+
+// Include shared secrets (gitignored)
+#include "Secrets.xcconfig"
+
+// Debug-specific settings
+DEBUG_MODE = YES
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG
+
+// Enable additional logging in debug builds
+OTHER_SWIFT_FLAGS = $(inherited) -DDEBUG

@@ -1,0 +1,16 @@
+//
+//  Release.xcconfig
+//  Investor Tool
+//
+//  Configuration for Release builds
+//
+
+// Include shared secrets (gitignored)
+#include "Secrets.xcconfig"
+
+// Release-specific settings
+DEBUG_MODE = NO
+
+// Optimize for production
+SWIFT_OPTIMIZATION_LEVEL = -O
+SWIFT_COMPILATION_MODE = wholemodule

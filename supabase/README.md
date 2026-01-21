@@ -26,27 +26,33 @@ supabase/
 
 ---
 
-## 🔐 Auth (OTP-First)
+## 🔐 Auth
 
-**Primary authentication method:** Email + OTP (One-Time Password)
+**Primary authentication method (iOS):** Email + Password (OTP also documented)
 
 **User flow:**
-1. User enters email → receives 6-digit code
-2. User enters code → authenticated
-3. Session stored securely (Keychain on iOS)
+1. User signs up/in with email and password
+2. Session stored securely via Supabase client
+3. JWT automatically attached to all requests
 
 **Documentation:**
 
 - **[OTP Auth UX Spec](./docs/auth-otp-spec.md)** — Complete product spec (screens, settings, iOS integration contract)
 - **[Supabase Settings Checklist](./docs/supabase-settings-checklist.md)** — Quick reference for dashboard configuration
 
+**iOS Integration (SECURE):**
+
+- **[iOS Integration Complete Guide](../SUPABASE_INTEGRATION_COMPLETE.md)** — Full setup guide with security
+- **[Key Rotation Guide](../SUPABASE_KEY_ROTATION_GUIDE.md)** — Rotate exposed keys immediately
+- **[Xcode Setup Guide](../XCODE_SETUP_GUIDE.md)** — Configure xcconfig for safe secret storage
+
 **Key features:**
 
-- ✅ Passwordless (no passwords to remember or leak)
-- ✅ Robinhood-like UX (simple, fast, mobile-first)
+- ✅ Passwordless OR password-based (both supported)
 - ✅ Row-Level Security (RLS) enforces per-user data isolation
 - ✅ JWT-based sessions (access token + refresh token)
 - ✅ Rate limiting (prevents abuse and brute-force)
+- ✅ Secure key management (xcconfig, never hardcoded)
 
 ---
 
@@ -181,6 +187,29 @@ OTP code for test@example.com: 123456
 
 **Endpoint:** `GET /functions/v1/auth-ping`
 
+#### `write-forecast-version` — Rate-Limited Forecast Versions
+
+**Purpose:** Create forecast versions with rate limiting (max 5/min, 30/5min per user).
+
+**Endpoint:** `POST /functions/v1/write-forecast-version`
+
+**Body:**
+```json
+{
+  "forecast_id": "uuid",
+  "assumptions": { "key": "value" },
+  "results": { "npv": 1234 },
+  "note": "Optional note"
+}
+```
+
+**Rate Limits:**
+- 5 writes per minute per user
+- 30 writes per 5 minutes per user
+- Returns 429 with `Retry-After` if exceeded
+
+**See:** `../RATE_LIMITING_GUIDE.md` for configuration
+
 **Headers:**
 
 ```
@@ -291,40 +320,28 @@ curl https://xyz.supabase.co/functions/v1/auth-ping \
 
 **Migrations are versioned SQL files that define database schema and RLS policies.**
 
-**Example migration:** `20260120000000_initial_schema.sql`
+**Current Schema:** `20260120_initial_schema_with_rls.sql`
 
-```sql
--- Create forecasts table
-CREATE TABLE forecasts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    ticker TEXT NOT NULL,
-    forecast_data JSONB NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+**Tables:**
+- `profiles` - User metadata (auto-created on signup)
+- `watchlists` - User's tracked tickers
+- `forecasts` - User's valuation models
+- `forecast_versions` - Versioned assumptions/results
+- `rate_limits` - Rate limiting counters (for Edge Functions)
 
--- Enable RLS
-ALTER TABLE forecasts ENABLE ROW LEVEL SECURITY;
+**Quick Setup:**
 
--- RLS Policies
-CREATE POLICY "Users can read own forecasts"
-ON forecasts FOR SELECT
-USING (auth.uid() = user_id);
+1. Open: `../PASTE_INTO_SUPABASE_SQL_EDITOR.sql`
+2. Copy entire file
+3. Paste into Supabase Dashboard → SQL Editor
+4. Run (Cmd/Ctrl+Enter)
+5. Verify success message
 
-CREATE POLICY "Users can insert own forecasts"
-ON forecasts FOR INSERT
-WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own forecasts"
-ON forecasts FOR UPDATE
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own forecasts"
-ON forecasts FOR DELETE
-USING (auth.uid() = user_id);
-```
+**All tables have:**
+- ✅ RLS enabled
+- ✅ Policies enforcing `user_id = auth.uid()`
+- ✅ Indexes for performance
+- ✅ Cascade deletes on user deletion
 
 ### Creating Migrations
 
