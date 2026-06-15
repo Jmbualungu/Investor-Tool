@@ -49,6 +49,7 @@ struct ForecastHomeView: View {
                     .padding(.bottom, DSSpacing.xl)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("Forecast")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Route.self) { route in

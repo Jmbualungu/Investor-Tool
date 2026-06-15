@@ -16,6 +16,7 @@ struct LibraryView: View {
                 
                 emptyState
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("Library")
             .navigationBarTitleDisplayMode(.large)
         }

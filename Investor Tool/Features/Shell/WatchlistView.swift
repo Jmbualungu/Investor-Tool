@@ -51,6 +51,7 @@ struct WatchlistView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("Watchlist")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Route.self) { route in

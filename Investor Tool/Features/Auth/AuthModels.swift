@@ -18,12 +18,19 @@ struct AuthUser: Identifiable, Codable {
         self.email = user.email
         self.createdAt = user.createdAt
     }
+    
+    init(id: UUID, email: String?, createdAt: Date) {
+        self.id = id
+        self.email = email
+        self.createdAt = createdAt
+    }
 }
 
 enum AuthState {
     case loading
     case authenticated(AuthUser)
     case unauthenticated
+    case passwordRecoveryPending  // Deep link received, show UpdatePasswordView
     case error(String)
 }
 

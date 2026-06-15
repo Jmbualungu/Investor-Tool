@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnboardingFlowView: View {
-    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var config: GlobalAppConfig
     @StateObject private var viewModel = OnboardingViewModel()
     
     var body: some View {
@@ -9,7 +9,7 @@ struct OnboardingFlowView: View {
             DSColors.background
                 .ignoresSafeArea()
             
-            VStack(spacing: DSSpacing.l) {
+            VStack(spacing: 0) {
                 header
                 
                 ScrollView(showsIndicators: false) {
@@ -19,13 +19,27 @@ struct OnboardingFlowView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, DSSpacing.l)
                     .padding(.top, DSSpacing.m)
+                    .padding(.bottom, DSSpacing.xl)
                 }
-                
+            }
+            .safeAreaInset(edge: .bottom) {
                 footer
             }
-            .padding(.bottom, DSSpacing.l)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            #if DEBUG
+            DebugLayoutLogFromContext("Onboarding presented")
+            #endif
+        }
+        .onChange(of: viewModel.step) { _, newStep in
+            #if DEBUG
+            if newStep == .paywall {
+                DebugLayoutLogFromContext("Paywall presented")
+            }
+            #endif
+        }
     }
     
     private var header: some View {
@@ -33,7 +47,7 @@ struct OnboardingFlowView: View {
             HStack {
                 Button {
                     if viewModel.step == .welcome {
-                        dismiss()
+                        completeOnboarding()
                     } else {
                         viewModel.goBack()
                     }
@@ -84,11 +98,7 @@ struct OnboardingFlowView: View {
     private var footer: some View {
         VStack(spacing: DSSpacing.s) {
             DSPillButton(title: primaryCTA, style: .primary) {
-                if viewModel.step == .paywall {
-                    dismiss()
-                } else {
-                    viewModel.advance()
-                }
+                ctaTapped()
             }
             .disabled(!viewModel.canContinue)
             .opacity(viewModel.canContinue ? 1 : 0.6)
@@ -96,13 +106,36 @@ struct OnboardingFlowView: View {
             
             if viewModel.step == .paywall {
                 Button("Not now") {
-                    dismiss()
+                    notNowTapped()
                 }
                 .font(DSTypography.subheadline)
                 .foregroundColor(DSColors.textSecondary)
                 .padding(.bottom, DSSpacing.s)
             }
         }
+        .padding(.top, DSSpacing.s)
+    }
+    
+    private func ctaTapped() {
+        #if DEBUG
+        print("📱 [Onboarding] CTA tapped — step: \(viewModel.step), canContinue: \(viewModel.canContinue)")
+        #endif
+        if viewModel.step == .paywall {
+            completeOnboarding()
+        } else {
+            viewModel.advance()
+        }
+    }
+    
+    private func notNowTapped() {
+        #if DEBUG
+        print("📱 [Onboarding] Not now tapped — completing onboarding")
+        #endif
+        completeOnboarding()
+    }
+    
+    private func completeOnboarding() {
+        config.hasSeenOnboarding = true
     }
     
     private var primaryCTA: String {
@@ -233,7 +266,7 @@ private extension OnboardingFlowView {
             }
             .padding(DSSpacing.xl)
         }
-        .frame(maxWidth: .infinity, minHeight: 220)
+        .frame(maxWidth: .infinity)
     }
     
     var paywallContent: some View {
@@ -329,6 +362,8 @@ private struct OnboardingOptionPill: View {
             .foregroundColor(isSelected ? .white : DSColors.textPrimary)
             .padding(.horizontal, DSSpacing.l)
             .frame(height: DSSpacing.buttonHeightStandard)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
             .background(isSelected ? DSColors.accent : DSColors.surface)
             .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
             .overlay(
@@ -419,5 +454,6 @@ private struct OnboardingBenefitRow: View {
 #Preview {
     NavigationStack {
         OnboardingFlowView()
+            .environmentObject(GlobalAppConfig())
     }
 }

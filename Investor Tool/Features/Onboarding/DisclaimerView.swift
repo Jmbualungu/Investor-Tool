@@ -7,11 +7,14 @@
 //
 
 import SwiftUI
+import SafariServices
 
 struct DisclaimerView: View {
     @StateObject private var disclaimerManager = DisclaimerManager()
     @State private var hasAcceptedCheckbox = false
     @State private var hasScrolledToBottom = false
+    @State private var showingSafari = false
+    @State private var safariURL: URL?
     
     let onAccept: () -> Void
     
@@ -29,6 +32,11 @@ struct DisclaimerView: View {
                 // Scrollable disclaimer content
                 disclaimerContent
                     .padding(.top, DSSpacing.l)
+                
+                // Legal links (Privacy & Terms)
+                legalLinks
+                    .padding(.horizontal, DSSpacing.l)
+                    .padding(.top, DSSpacing.s)
                 
                 // Checkbox
                 checkboxSection
@@ -183,6 +191,58 @@ You are solely responsible for any investment decisions you make. We recommend c
             .foregroundColor(DSColors.textTertiary)
             .multilineTextAlignment(.center)
             .padding(.horizontal, DSSpacing.xl)
+    }
+    
+    // MARK: - Legal Links
+    
+    private var legalLinks: some View {
+        HStack(spacing: DSSpacing.s) {
+            Button {
+                openPrivacyPolicy()
+            } label: {
+                Text("Privacy Policy")
+                    .font(DSTypography.caption)
+                    .foregroundColor(DSColors.accent)
+                    .underline()
+            }
+            
+            Text("•")
+                .font(DSTypography.caption)
+                .foregroundColor(DSColors.textTertiary)
+            
+            Button {
+                openTermsOfService()
+            } label: {
+                Text("Terms of Service")
+                    .font(DSTypography.caption)
+                    .foregroundColor(DSColors.accent)
+                    .underline()
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .sheet(isPresented: $showingSafari) {
+            if let url = safariURL {
+                SafariView(url: url)
+            }
+        }
+    }
+    
+    // MARK: - Actions
+    
+    private func openPrivacyPolicy() {
+        // TODO: Replace with your actual hosted URL after deployment
+        if let url = URL(string: "https://your-domain.com/privacy.html") {
+            safariURL = url
+            showingSafari = true
+        }
+    }
+    
+    private func openTermsOfService() {
+        // TODO: Replace with your actual hosted URL after deployment
+        if let url = URL(string: "https://your-domain.com/terms.html") {
+            safariURL = url
+            showingSafari = true
+        }
     }
 }
 

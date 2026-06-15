@@ -5,6 +5,7 @@
 //  Debug-only screen for testing Supabase integration
 //
 
+import Combine
 import SwiftUI
 import Supabase
 
@@ -76,7 +77,7 @@ struct BackendStatusView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(12)
                                 }
-                                .disabled(viewModel.isRunningTests || viewModel.currentUser == nil)
+                                .disabled(viewModel.isRunningTests || viewModel.currentUser == nil || !viewModel.isConfigured)
                             }
                         }
                     )
@@ -197,11 +198,17 @@ final class BackendStatusViewModel: ObservableObject {
     @Published var testLogs: [String] = []
     @Published var isRunningTests = false
     
-    private let supabase = SupabaseClientProvider.shared
+    private var client: SupabaseClient? { SupabaseClientProvider.shared.client }
+    
+    var isConfigured: Bool { SupabaseClientProvider.shared.isConfigured }
     
     func loadCurrentUser() async {
+        guard let client = client else {
+            log("⚠️ Supabase not configured")
+            return
+        }
         do {
-            let session = try await supabase.auth.session
+            let session = try await client.auth.session
             currentUser = AuthUser(from: session.user)
             log("✅ Loaded user: \(session.user.id)")
         } catch {
@@ -211,6 +218,10 @@ final class BackendStatusViewModel: ObservableObject {
     }
     
     func runAllTests() async {
+        guard client != nil else {
+            log("⚠️ Supabase not configured — skip tests")
+            return
+        }
         isRunningTests = true
         testLogs = []
         
@@ -224,11 +235,15 @@ final class BackendStatusViewModel: ObservableObject {
     // MARK: - Test 1: Auth Session
     
     private func testAuthSession() async {
+        guard let client = client else {
+            testResults["auth"] = .failed("Supabase not configured")
+            return
+        }
         testResults["auth"] = .running
         log("🧪 Test 1: Auth Session...")
         
         do {
-            let session = try await supabase.auth.session
+            let session = try await client.auth.session
             log("✅ User ID: \(session.user.id)")
             log("✅ Email: \(session.user.email ?? "none")")
             testResults["auth"] = .passed
@@ -241,6 +256,10 @@ final class BackendStatusViewModel: ObservableObject {
     // MARK: - Test 2: Watchlist Read/Write
     
     private func testWatchlistReadWrite() async {
+        guard let client = client else {
+            testResults["watchlist"] = .failed("Supabase not configured")
+            return
+        }
         testResults["watchlist"] = .running
         log("🧪 Test 2: Watchlist Read/Write...")
         
@@ -260,7 +279,7 @@ final class BackendStatusViewModel: ObservableObject {
             
             let insert = WatchlistInsert(user_id: userId, ticker: testTicker)
             
-            try await supabase.database
+            try await client
                 .from("watchlists")
                 .insert(insert)
                 .execute()
@@ -273,7 +292,7 @@ final class BackendStatusViewModel: ObservableObject {
                 let ticker: String
             }
             
-            let response: [WatchlistRow] = try await supabase.database
+            let response: [WatchlistRow] = try await client
                 .from("watchlists")
                 .select()
                 .eq("ticker", value: testTicker)
@@ -285,7 +304,7 @@ final class BackendStatusViewModel: ObservableObject {
                 testResults["watchlist"] = .passed
                 
                 // Clean up
-                try? await supabase.database
+                try? await client
                     .from("watchlists")
                     .delete()
                     .eq("ticker", value: testTicker)
@@ -303,6 +322,10 @@ final class BackendStatusViewModel: ObservableObject {
     // MARK: - Test 3: Forecast + Version (via Edge Function)
     
     private func testForecastCreation() async {
+        guard let client = client else {
+            testResults["forecast"] = .failed("Supabase not configured")
+            return
+        }
         testResults["forecast"] = .running
         log("🧪 Test 3: Forecast + Version...")
         
@@ -330,7 +353,7 @@ final class BackendStatusViewModel: ObservableObject {
                 let id: UUID
             }
             
-            let forecast: [ForecastRow] = try await supabase.database
+            let forecast: [ForecastRow] = try await client
                 .from("forecasts")
                 .insert(forecastInsert)
                 .select()
@@ -360,7 +383,7 @@ final class BackendStatusViewModel: ObservableObject {
             // Note: This will fail if Edge Function isn't deployed yet
             // That's okay for now - we test the DB layer
             do {
-                let _: EmptyResponse = try await supabase.functions
+                let _: EmptyResponse = try await client.functions
                     .invoke("write-forecast-version", options: FunctionInvokeOptions(body: request))
                 log("✅ Created version via Edge Function")
             } catch {
@@ -382,7 +405,7 @@ final class BackendStatusViewModel: ObservableObject {
                     note: "Smoke test"
                 )
                 
-                try await supabase.database
+                try await client
                     .from("forecast_versions")
                     .insert(versionInsert)
                     .execute()
@@ -393,7 +416,7 @@ final class BackendStatusViewModel: ObservableObject {
             testResults["forecast"] = .passed
             
             // Clean up
-            try? await supabase.database
+            try? await client
                 .from("forecasts")
                 .delete()
                 .eq("id", value: forecastId.uuidString)

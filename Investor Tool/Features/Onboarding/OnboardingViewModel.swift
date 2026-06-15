@@ -71,11 +71,16 @@ final class OnboardingViewModel: ObservableObject {
     }
     
     func toggleGoal(_ goal: OnboardingGoal) {
-        if selectedGoals.contains(goal.id) {
-            selectedGoals.remove(goal.id)
+        var next = selectedGoals
+        if next.contains(goal.id) {
+            next.remove(goal.id)
         } else {
-            selectedGoals.insert(goal.id)
+            next.insert(goal.id)
         }
+        selectedGoals = next
+        #if DEBUG
+        print("📱 [Onboarding] Goal toggled — id: \(goal.id), selected: \(selectedGoals), canContinue: \(canContinue)")
+        #endif
     }
     
     func selectRisk(_ profile: RiskProfile) {

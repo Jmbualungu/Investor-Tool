@@ -50,6 +50,7 @@ struct AppShellView: View {
             }
             .tag(Tab.settings)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .environmentObject(flowState)
         .tint(DSColors.accent)
     }
