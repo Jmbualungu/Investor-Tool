@@ -6,8 +6,7 @@ enum OnboardingStep: Int, CaseIterable, Identifiable {
     case risk
     case benefits
     case teaser
-    case paywall
-    
+
     var id: Int { rawValue }
     
     var title: String {
@@ -22,8 +21,6 @@ enum OnboardingStep: Int, CaseIterable, Identifiable {
             return "What's New"
         case .teaser:
             return "Your Plan"
-        case .paywall:
-            return "Unlock"
         }
     }
 }

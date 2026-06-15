@@ -33,13 +33,6 @@ struct OnboardingFlowView: View {
             DebugLayoutLogFromContext("Onboarding presented")
             #endif
         }
-        .onChange(of: viewModel.step) { _, newStep in
-            #if DEBUG
-            if newStep == .paywall {
-                DebugLayoutLogFromContext("Paywall presented")
-            }
-            #endif
-        }
     }
     
     private var header: some View {
@@ -90,11 +83,9 @@ struct OnboardingFlowView: View {
             benefitsContent
         case .teaser:
             teaserContent
-        case .paywall:
-            paywallContent
         }
     }
-    
+
     private var footer: some View {
         VStack(spacing: DSSpacing.s) {
             DSPillButton(title: primaryCTA, style: .primary) {
@@ -103,47 +94,31 @@ struct OnboardingFlowView: View {
             .disabled(!viewModel.canContinue)
             .opacity(viewModel.canContinue ? 1 : 0.6)
             .padding(.horizontal, DSSpacing.l)
-            
-            if viewModel.step == .paywall {
-                Button("Not now") {
-                    notNowTapped()
-                }
-                .font(DSTypography.subheadline)
-                .foregroundColor(DSColors.textSecondary)
-                .padding(.bottom, DSSpacing.s)
-            }
         }
         .padding(.top, DSSpacing.s)
     }
-    
+
     private func ctaTapped() {
         #if DEBUG
         print("📱 [Onboarding] CTA tapped — step: \(viewModel.step), canContinue: \(viewModel.canContinue)")
         #endif
-        if viewModel.step == .paywall {
+        if viewModel.step == .teaser {
             completeOnboarding()
         } else {
             viewModel.advance()
         }
     }
-    
-    private func notNowTapped() {
-        #if DEBUG
-        print("📱 [Onboarding] Not now tapped — completing onboarding")
-        #endif
-        completeOnboarding()
-    }
-    
+
     private func completeOnboarding() {
         config.hasSeenOnboarding = true
     }
-    
+
     private var primaryCTA: String {
         switch viewModel.step {
         case .welcome:
             return "Start"
-        case .paywall:
-            return "Start free trial"
+        case .teaser:
+            return "Get started"
         default:
             return "Continue"
         }
@@ -267,61 +242,6 @@ private extension OnboardingFlowView {
             .padding(DSSpacing.xl)
         }
         .frame(maxWidth: .infinity)
-    }
-    
-    var paywallContent: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.l) {
-            VStack(alignment: .leading, spacing: DSSpacing.s) {
-                Text("Unlock your personalized plan")
-                    .dsTitle()
-                Text("Start your free trial to access recommendations, alerts, and insights.")
-                    .dsSubheadline()
-            }
-            
-            DSGlassCard {
-                VStack(alignment: .leading, spacing: DSSpacing.m) {
-                    ForEach(viewModel.benefits) { benefit in
-                        OnboardingBenefitRow(
-                            icon: benefit.icon,
-                            title: benefit.title,
-                            subtitle: benefit.subtitle
-                        )
-                    }
-                }
-            }
-            
-            VStack(alignment: .leading, spacing: DSSpacing.s) {
-                DSSegmentedPill(
-                    labels: viewModel.pricingOptions.map { $0.title },
-                    selectedIndex: $viewModel.selectedPricingIndex
-                )
-                
-                let option = viewModel.pricingOptions[viewModel.selectedPricingIndex]
-                DSGlassCard {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Text(option.price)
-                                .dsTitle()
-                            Spacer()
-                            if option.isBestValue {
-                                Text("Best value")
-                                    .font(DSTypography.caption.weight(.semibold))
-                                    .foregroundColor(DSColors.accent)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 4)
-                                    .background(DSColors.surface)
-                                    .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
-                            }
-                        }
-                        Text(option.subtitle)
-                            .dsSubheadline()
-                    }
-                }
-            }
-            
-            Text("Cancel anytime.")
-                .dsCaption()
-        }
     }
 }
 

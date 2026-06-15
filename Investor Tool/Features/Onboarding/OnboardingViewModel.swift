@@ -65,7 +65,7 @@ final class OnboardingViewModel: ObservableObject {
             return !selectedGoals.isEmpty
         case .risk:
             return selectedRisk != nil
-        case .benefits, .teaser, .paywall:
+        case .benefits, .teaser:
             return true
         }
     }
