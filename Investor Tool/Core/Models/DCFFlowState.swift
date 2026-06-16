@@ -96,28 +96,24 @@ class DCFFlowState: ObservableObject {
         return priceVariation
     }
     
+    /// Full discounted-cash-flow breakdown for the current assumptions.
+    var derivedValuation: ValuationBreakdown {
+        DCFEngine.discountedValuation(
+            revenueIndex: derivedTopLineRevenue,
+            fcfIndex: derivedFreeCashFlowIndex,
+            horizonYears: investmentLens.horizon.years,
+            discountRate: valuationAssumptions.discountRate,
+            terminalGrowth: valuationAssumptions.terminalGrowth
+        )
+    }
+
     var derivedIntrinsicValue: Double {
-        let fcfIndex = derivedFreeCashFlowIndex
-        let discountRate = valuationAssumptions.discountRate
-        let terminalGrowth = valuationAssumptions.terminalGrowth
-        
-        // Base scale factor
-        let baseScale = 1.2
-        
-        // Simple PV factor approximation
-        let pvFactor = 1.0 / max(0.01, discountRate / 100.0)
-        
-        // Terminal value factor
-        let terminalFactor = 1.0 / max(0.01, (discountRate - terminalGrowth) / 100.0)
-        
-        // Intrinsic value = (PV of forecast period) + (PV of terminal value)
-        let forecastPV = fcfIndex * baseScale * 0.9 * pvFactor
-        let terminalPV = fcfIndex * baseScale * 0.6 * terminalFactor
-        
-        let intrinsic = forecastPV + terminalPV
-        
-        // Clamp to reasonable range
-        return min(max(intrinsic, 20.0), 800.0)
+        derivedValuation.intrinsic
+    }
+
+    /// Share of intrinsic value coming from the terminal value (computed, not assumed).
+    var derivedTerminalSharePercent: Double {
+        derivedValuation.terminalSharePercent
     }
     
     var derivedUpsidePercent: Double {

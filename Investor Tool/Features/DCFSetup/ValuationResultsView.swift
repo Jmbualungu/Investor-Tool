@@ -530,15 +530,17 @@ struct ValuationResultsView: View {
                 .foregroundColor(DSColors.textPrimary)
             
             VStack(spacing: DSSpacing.m) {
+                let terminalShare = flowState.derivedTerminalSharePercent / 100.0
+
                 breakdownRow(
                     label: "PV of Forecast Period",
-                    value: flowState.derivedIntrinsicValue * 0.35,
+                    value: flowState.derivedIntrinsicValue * (1.0 - terminalShare),
                     isHighlighted: false
                 )
-                
+
                 breakdownRow(
                     label: "PV of Terminal Value",
-                    value: flowState.derivedIntrinsicValue * 0.65,
+                    value: flowState.derivedIntrinsicValue * terminalShare,
                     isHighlighted: false
                 )
                 
@@ -558,7 +560,7 @@ struct ValuationResultsView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(DSColors.accent)
                 
-                Text("Terminal value represents ~65% of total value")
+                Text("Terminal value represents ~\(Int(flowState.derivedTerminalSharePercent.rounded()))% of total value")
                     .font(DSTypography.caption)
                     .foregroundColor(DSColors.textSecondary)
             }

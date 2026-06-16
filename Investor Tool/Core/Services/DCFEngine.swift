@@ -27,6 +27,15 @@ struct DCFOutputs: Equatable {
     var terminalSharePercent: Double
 }
 
+/// Result of a discounted-cash-flow valuation, split into its present-value
+/// components so the UI can show a truthful breakdown.
+struct ValuationBreakdown: Equatable {
+    var intrinsic: Double
+    var pvForecast: Double
+    var pvTerminal: Double
+    var terminalSharePercent: Double
+}
+
 // MARK: - Scenario Preset Enum
 
 enum ScenarioPreset: String, CaseIterable, Identifiable {
@@ -63,28 +72,29 @@ struct DCFEngine {
         let fcfIndex = revenueIndex * fcfMargin
         let clampedFCFIndex = min(max(fcfIndex, 0.0), 120.0)
         
-        // Calculate intrinsic value
-        let intrinsicValue = calculateIntrinsicValue(
+        // Run a genuine discounted-cash-flow valuation
+        let breakdown = discountedValuation(
+            revenueIndex: revenueIndex,
             fcfIndex: clampedFCFIndex,
-            valuation: inputs.valuation
+            horizonYears: inputs.horizonYears,
+            discountRate: inputs.valuation.discountRate,
+            terminalGrowth: inputs.valuation.terminalGrowth
         )
-        
+        let intrinsicValue = breakdown.intrinsic
+
         // Calculate upside
         let upsidePercent = calculateUpsidePercent(
             intrinsic: intrinsicValue,
             current: inputs.currentPrice
         )
-        
+
         // Calculate CAGR
         let cagrPercent = calculateCAGR(
             intrinsic: intrinsicValue,
             current: inputs.currentPrice,
             years: inputs.horizonYears
         )
-        
-        // Terminal value share (approximation: ~65% typical)
-        let terminalSharePercent = 65.0
-        
+
         return DCFOutputs(
             revenueIndex: revenueIndex,
             fcfMargin: fcfMargin,
@@ -92,7 +102,59 @@ struct DCFEngine {
             intrinsicValue: intrinsicValue,
             upsidePercent: upsidePercent,
             cagrPercent: cagrPercent,
-            terminalSharePercent: terminalSharePercent
+            terminalSharePercent: breakdown.terminalSharePercent
+        )
+    }
+
+    // MARK: - Discounted Cash Flow
+
+    /// Genuine DCF valuation in normalized (index) terms: projects a free-cash-flow
+    /// series over the horizon, discounts each year at the discount rate, adds a
+    /// Gordon-growth terminal value discounted back, and reports the present-value
+    /// split. Magnitudes are illustrative (no real per-share financials), but the
+    /// mechanics and sensitivities are real.
+    static func discountedValuation(
+        revenueIndex: Double,
+        fcfIndex: Double,
+        horizonYears: Int,
+        discountRate: Double,
+        terminalGrowth: Double
+    ) -> ValuationBreakdown {
+        let n = max(1, horizonYears)
+        let r = max(0.01, discountRate / 100.0)
+        // Keep a floor between discount rate and terminal growth so r - g is well-defined.
+        let g = min(terminalGrowth / 100.0, r - 0.02)
+        let spread = max(r - g, 0.02)
+
+        // Recover the normalized FCF margin and the implied annual revenue growth
+        // that takes a base of 100 to the current revenue index over the horizon.
+        let safeRevenueIndex = max(revenueIndex, 1.0)
+        let fcfMargin = fcfIndex / safeRevenueIndex
+        let annualGrowth = pow(safeRevenueIndex / 100.0, 1.0 / Double(n)) - 1.0
+
+        // PV of the explicit forecast period.
+        var pvForecast = 0.0
+        var finalYearFCF = 0.0
+        for t in 1...n {
+            let revenue = 100.0 * pow(1.0 + annualGrowth, Double(t))
+            let fcf = revenue * fcfMargin
+            pvForecast += fcf / pow(1.0 + r, Double(t))
+            finalYearFCF = fcf
+        }
+
+        // Gordon-growth terminal value on the final-year FCF, discounted to today.
+        let terminalValue = finalYearFCF * (1.0 + g) / spread
+        let pvTerminal = terminalValue / pow(1.0 + r, Double(n))
+
+        let total = max(pvForecast + pvTerminal, 0.0)
+        let intrinsic = min(max(total, 5.0), 2000.0)
+        let terminalShare = total > 0 ? (pvTerminal / total) * 100.0 : 0.0
+
+        return ValuationBreakdown(
+            intrinsic: intrinsic,
+            pvForecast: pvForecast,
+            pvTerminal: pvTerminal,
+            terminalSharePercent: min(max(terminalShare, 0.0), 100.0)
         )
     }
     
@@ -350,29 +412,6 @@ struct DCFEngine {
         
         // Clamp to reasonable range
         return min(max(fcfMargin, 0.0), 0.35)
-    }
-    
-    private static func calculateIntrinsicValue(
-        fcfIndex: Double,
-        valuation: ValuationAssumptions
-    ) -> Double {
-        // Base scale factor
-        let baseScale = 1.2
-        
-        // Simple PV factor approximation
-        let pvFactor = 1.0 / max(0.01, valuation.discountRate / 100.0)
-        
-        // Terminal value factor
-        let terminalFactor = 1.0 / max(0.01, (valuation.discountRate - valuation.terminalGrowth) / 100.0)
-        
-        // Intrinsic value = (PV of forecast period) + (PV of terminal value)
-        let forecastPV = fcfIndex * baseScale * 0.9 * pvFactor
-        let terminalPV = fcfIndex * baseScale * 0.6 * terminalFactor
-        
-        let intrinsic = forecastPV + terminalPV
-        
-        // Clamp to reasonable range
-        return min(max(intrinsic, 20.0), 800.0)
     }
     
     private static func calculateUpsidePercent(intrinsic: Double, current: Double) -> Double {
