@@ -41,22 +41,22 @@ enum RiskProfile: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .conservative:
-            return "Low volatility"
+            return "Conservative"
         case .balanced:
             return "Balanced"
         case .growth:
-            return "Growth-focused"
+            return "Aggressive"
         }
     }
-    
+
     var description: String {
         switch self {
         case .conservative:
-            return "Steadier returns with smaller swings."
+            return "Cautious growth and a higher discount rate."
         case .balanced:
-            return "A mix of stability and growth."
+            return "Reasonable base-case assumptions."
         case .growth:
-            return "Higher upside with more volatility."
+            return "Optimistic growth and a lower discount rate."
         }
     }
     
@@ -77,12 +77,4 @@ struct OnboardingBenefit: Identifiable, Hashable {
     let icon: String
     let title: String
     let subtitle: String
-}
-
-struct PricingOption: Identifiable, Hashable {
-    let id: String
-    let title: String
-    let price: String
-    let subtitle: String
-    let isBestValue: Bool
 }

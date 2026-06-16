@@ -143,21 +143,21 @@ private extension OnboardingFlowView {
             }
             
             VStack(alignment: .leading, spacing: DSSpacing.s) {
-                Text("Let’s personalize your investing plan")
+                Text("Value any company with a DCF model")
                     .dsTitle()
-                
-                Text("Answer a few quick questions so we can tailor your experience.")
+
+                Text("Answer a couple of quick questions and we’ll set up your first valuation.")
                     .dsSubheadline()
             }
         }
     }
-    
+
     var goalsContent: some View {
         VStack(alignment: .leading, spacing: DSSpacing.l) {
             VStack(alignment: .leading, spacing: DSSpacing.s) {
-                Text("What brings you here?")
+                Text("What do you want to do?")
                     .dsTitle()
-                Text("Select all that apply so we can customize your plan.")
+                Text("Select all that apply so we can tailor your experience.")
                     .dsSubheadline()
             }
             
@@ -178,9 +178,9 @@ private extension OnboardingFlowView {
     var riskContent: some View {
         VStack(alignment: .leading, spacing: DSSpacing.l) {
             VStack(alignment: .leading, spacing: DSSpacing.s) {
-                Text("How comfortable are you with risk?")
+                Text("How do you like to set assumptions?")
                     .dsTitle()
-                Text("We’ll shape your plan to match your comfort level.")
+                Text("We’ll preset your model’s defaults to match. You can change them anytime.")
                     .dsSubheadline()
             }
             
@@ -202,9 +202,9 @@ private extension OnboardingFlowView {
     var benefitsContent: some View {
         VStack(alignment: .leading, spacing: DSSpacing.l) {
             VStack(alignment: .leading, spacing: DSSpacing.s) {
-                Text("What’s New")
+                Text("What you can do")
                     .dsTitle()
-                Text("A calm, focused way to stay on track.")
+                Text("Everything you need to value a company.")
                     .dsSubheadline()
             }
             
@@ -234,9 +234,9 @@ private extension OnboardingFlowView {
             )
             
             VStack(spacing: DSSpacing.s) {
-                Text("Your plan is ready")
+                Text("You’re all set")
                     .dsTitle()
-                Text("See your personalized strategy and projections.")
+                Text("Pick a company and build your first valuation.")
                     .dsSubheadline()
             }
             .padding(DSSpacing.xl)

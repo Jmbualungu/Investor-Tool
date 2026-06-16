@@ -5,54 +5,36 @@ final class OnboardingViewModel: ObservableObject {
     @Published var step: OnboardingStep = .welcome
     @Published var selectedGoals: Set<String> = []
     @Published var selectedRisk: RiskProfile? = nil
-    @Published var selectedPricingIndex: Int = 1
-    
+
     let goals: [OnboardingGoal] = [
-        OnboardingGoal(id: "wealth", title: "Grow long-term wealth", icon: "chart.line.uptrend.xyaxis"),
-        OnboardingGoal(id: "income", title: "Build monthly income", icon: "banknote"),
-        OnboardingGoal(id: "inflation", title: "Beat inflation", icon: "flame"),
-        OnboardingGoal(id: "risk", title: "Reduce downside risk", icon: "shield"),
-        OnboardingGoal(id: "learn", title: "Learn investing", icon: "book")
+        OnboardingGoal(id: "value", title: "Value a specific company", icon: "building.2"),
+        OnboardingGoal(id: "model", title: "Build a DCF model", icon: "function"),
+        OnboardingGoal(id: "sensitivity", title: "Run sensitivity analysis", icon: "slider.horizontal.3"),
+        OnboardingGoal(id: "watchlist", title: "Track ideas on a watchlist", icon: "star"),
+        OnboardingGoal(id: "learn", title: "Learn how valuation works", icon: "book")
     ]
-    
+
     let benefits: [OnboardingBenefit] = [
         OnboardingBenefit(
-            id: "personalized",
-            icon: "sparkles",
-            title: "Personalized allocation",
-            subtitle: "A plan matched to your goals and risk comfort."
+            id: "engine",
+            icon: "function",
+            title: "Full DCF engine",
+            subtitle: "Project free cash flows and discount them to today's value."
         ),
         OnboardingBenefit(
-            id: "alerts",
-            icon: "bell.badge",
-            title: "Rebalancing alerts",
-            subtitle: "Timely nudges to stay on track."
+            id: "sensitivity",
+            icon: "slider.horizontal.3",
+            title: "Sensitivity analysis",
+            subtitle: "See how your valuation shifts as assumptions change."
         ),
         OnboardingBenefit(
-            id: "insights",
-            icon: "chart.bar.xaxis",
-            title: "Tax-smart insights",
-            subtitle: "Estimated impact of taxes and fees."
+            id: "library",
+            icon: "tray.full",
+            title: "Save your models",
+            subtitle: "Keep every forecast in your library to revisit later."
         )
     ]
-    
-    let pricingOptions: [PricingOption] = [
-        PricingOption(
-            id: "monthly",
-            title: "Monthly",
-            price: "$12.99",
-            subtitle: "Billed monthly",
-            isBestValue: false
-        ),
-        PricingOption(
-            id: "annual",
-            title: "Annual",
-            price: "$79.99",
-            subtitle: "Save 49% vs monthly",
-            isBestValue: true
-        )
-    ]
-    
+
     var progressLabel: String {
         "Step \(step.rawValue + 1) of \(OnboardingStep.allCases.count)"
     }
