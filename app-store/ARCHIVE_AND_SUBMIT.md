@@ -1,4 +1,4 @@
-# Presage — Archive & Submit runbook
+# Valtyde — Archive & Submit runbook
 
 Everything left to ship v1.0 to the App Store. Items marked **(you)** need
 your Apple/Supabase credentials and can't be done from the agent environment.
@@ -47,10 +47,10 @@ If you bump the version later: set `MARKETING_VERSION` (e.g. 1.0.1) and
 
 ## 2. Create the app record in App Store Connect (you)
 1. https://appstoreconnect.apple.com → **Apps → +** → New App.
-2. Platform iOS; Name **Presage** (see `LISTING.md` for the exact strings);
+2. Platform iOS; Name **Valtyde** (see `LISTING.md` for the exact strings);
    Primary language English (U.S.); Bundle ID `com.jamesmbualungu.InvestorTool`
    (register it in the Developer portal first if it's not in the dropdown);
-   SKU `presage-ios`.
+   SKU `valtyde-ios`.
 3. Fill the listing from `LISTING.md` (subtitle, description, keywords,
    promo text, support/privacy URLs), set category **Finance**, age rating
    **4+**, and the App Privacy answers (Email — optional, App Functionality,
@@ -75,8 +75,8 @@ Once the distribution cert/profile exist in Xcode, you can script it:
 ```sh
 cd "/Users/jamesmbualungu/Developer/Repos/Investor Tool"
 xcodebuild -scheme "Investor Tool" -configuration Release \
-  -destination 'generic/platform=iOS' -archivePath build/Presage.xcarchive archive
-xcodebuild -exportArchive -archivePath build/Presage.xcarchive \
+  -destination 'generic/platform=iOS' -archivePath build/Valtyde.xcarchive archive
+xcodebuild -exportArchive -archivePath build/Valtyde.xcarchive \
   -exportOptionsPlist app-store/ExportOptions.plist -exportPath build/export
 ```
 
@@ -102,7 +102,7 @@ reliably — capture those manually:
 xcrun simctl boot "iPhone 17 Pro Max"
 # build+install a Release build, run it, tap AAPL → walk the 7 steps,
 # and screenshot each screen you want to feature:
-xcrun simctl io booted screenshot ~/Desktop/presage-<screen>.png
+xcrun simctl io booted screenshot ~/Desktop/valtyde-<screen>.png
 ```
 You need at least 1 (Apple recommends 3–5). Good candidates: Start a Forecast,
 Company Context, Valuation Results, Sensitivity, Settings.

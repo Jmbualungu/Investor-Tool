@@ -18,7 +18,7 @@ struct AboutView: View {
                                 Spacer()
                             }
                             
-                            Text("Forecast AI")
+                            Text("Valtyde")
                                 .dsTitle()
                             
                             Text("A powerful DCF valuation tool built for iOS")

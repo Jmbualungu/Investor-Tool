@@ -133,9 +133,9 @@ struct DisclaimerView: View {
     
     private var disclaimerBodyText: String {
         """
-ForecastAI provides financial forecasts, simulations, and analytical tools for educational and informational purposes only.
+Valtyde provides financial forecasts, simulations, and analytical tools for educational and informational purposes only.
 
-ForecastAI does not provide investment advice, financial advice, or recommendations to buy or sell any securities. All forecasts are hypothetical, forward-looking, and based on user-defined assumptions that may not reflect real-world outcomes.
+Valtyde does not provide investment advice, financial advice, or recommendations to buy or sell any securities. All forecasts are hypothetical, forward-looking, and based on user-defined assumptions that may not reflect real-world outcomes.
 
 Investing involves risk, including the possible loss of principal. Past performance and simulated results are not indicative of future results.
 
@@ -155,7 +155,7 @@ You are solely responsible for any investment decisions you make. We recommend c
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(hasAcceptedCheckbox ? DSColors.accent : DSColors.textSecondary)
                 
-                Text("I understand and acknowledge that ForecastAI is not providing financial advice.")
+                Text("I understand and acknowledge that Valtyde is not providing financial advice.")
                     .font(DSTypography.body)
                     .foregroundColor(DSColors.textPrimary)
                     .multilineTextAlignment(.leading)
@@ -186,7 +186,7 @@ You are solely responsible for any investment decisions you make. We recommend c
     // MARK: - Trust Microcopy
     
     private var trustMicrocopy: some View {
-        Text("This helps us keep ForecastAI transparent and responsible.")
+        Text("This helps us keep Valtyde transparent and responsible.")
             .font(DSTypography.caption)
             .foregroundColor(DSColors.textTertiary)
             .multilineTextAlignment(.center)

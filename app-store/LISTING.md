@@ -1,4 +1,4 @@
-# Presage — App Store Connect listing copy
+# Valtyde — App Store Connect listing copy
 
 Paste-ready metadata for the App Store Connect submission. Keep the
 "educational / not financial advice / illustrative data" framing — it matches
@@ -7,9 +7,9 @@ the in-app disclaimer and the hosted Privacy Policy / Terms.
 ---
 
 ## App name (30 char max)
-`Presage: DCF Valuation`
+`Valtyde: DCF Valuation`
 
-_(Fallback if taken: `Presage — Stock Valuation`)_
+_(Fallback if taken: `Valtyde — Stock Valuation`)_
 
 ## Subtitle (30 char max)
 `Build DCF models for stocks`
@@ -23,7 +23,7 @@ _(Fallback if taken: `Presage — Stock Valuation`)_
 
 ## Description
 ```
-Presage is a focused discounted-cash-flow (DCF) modeling tool for people who
+Valtyde is a focused discounted-cash-flow (DCF) modeling tool for people who
 want to understand what a company might actually be worth — not just its stock
 price.
 
@@ -40,8 +40,8 @@ Built for clarity:
 • Conservative, balanced, or aggressive assumption presets to start from
 • Works without an account — sign in only if you want to sync
 
-Important: Presage is an educational modeling tool. Market data shown in the
-app is illustrative, and nothing in Presage is financial, investment, or
+Important: Valtyde is an educational modeling tool. Market data shown in the
+app is illustrative, and nothing in Valtyde is financial, investment, or
 tax advice. Always do your own research and consult a licensed professional
 before making any investment decision.
 ```
@@ -81,7 +81,7 @@ and save your forecasts.
 
 ## Review notes (paste into "Notes" for the reviewer)
 ```
-Presage is an educational DCF modeling tool. Market data shown is illustrative
+Valtyde is an educational DCF modeling tool. Market data shown is illustrative
 sample data, not live quotes, and the app does not provide financial advice.
 
 The app is fully usable without an account ("Continue without an account").

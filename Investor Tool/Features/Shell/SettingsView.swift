@@ -62,7 +62,7 @@ struct SettingsView: View {
                     if let deleteError {
                         Text(deleteError).font(DSTypography.caption).foregroundColor(.red)
                     } else if accountEmail == nil {
-                        Text("You're using Presage without an account. Sign in to sync your forecasts across devices.")
+                        Text("You're using Valtyde without an account. Sign in to sync your forecasts across devices.")
                             .font(DSTypography.caption)
                     } else {
                         Text("Deleting your account permanently removes your data. This cannot be undone.")
@@ -132,7 +132,7 @@ struct SettingsView: View {
                 } header: {
                     Text("About")
                 } footer: {
-                    Text("Presage provides financial forecasting tools for educational purposes only. Market data shown is illustrative. Not financial advice.")
+                    Text("Valtyde provides financial forecasting tools for educational purposes only. Market data shown is illustrative. Not financial advice.")
                         .font(DSTypography.caption)
                 }
                 

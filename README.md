@@ -1,4 +1,4 @@
-# Investor Tool (Forecast AI) — iOS SwiftUI App
+# Investor Tool (Valtyde) — iOS SwiftUI App
 
 ## Quick Start
 1) Open in Xcode
@@ -16,7 +16,7 @@
 - In Xcode, select your device from the toolbar.
 - Go to **Signing & Capabilities** for the `Investor Tool` target.
 - Set **Team** to your Apple ID or a paid team.
-- Ensure **Bundle Identifier** is unique (e.g. `com.example.ForecastAI.yourname`).
+- Ensure **Bundle Identifier** is unique (e.g. `com.example.Valtyde.yourname`).
 - Xcode will prompt to enable developer mode on device if needed.
 - Press **Run**.
 
