@@ -128,27 +128,43 @@ struct OnboardingFlowView: View {
 private extension OnboardingFlowView {
     var welcomeContent: some View {
         VStack(alignment: .leading, spacing: DSSpacing.l) {
-            ZStack {
-                Circle()
-                    .fill(DSColors.surface)
-                    .frame(width: 88, height: 88)
-                    .overlay(
-                        Circle()
-                            .stroke(DSColors.border, lineWidth: 1)
-                    )
-                
-                Image(systemName: "sparkles")
-                    .font(.system(size: 36, weight: .medium))
-                    .foregroundColor(DSColors.accent)
-            }
-            
-            VStack(alignment: .leading, spacing: DSSpacing.s) {
-                Text("Value any company with a DCF model")
-                    .dsTitle()
+            // Signature: the gap between price and the value we predict.
+            HStack(spacing: DSSpacing.l) {
+                ValueGauge(price: 212.40, value: 230.10)
+                    .frame(width: 44, height: 128)
 
-                Text("Answer a couple of quick questions and we’ll set up your first valuation.")
-                    .dsSubheadline()
+                VStack(alignment: .leading, spacing: DSSpacing.m) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("$230")
+                            .font(.system(size: 18, weight: .bold, design: .rounded).monospacedDigit())
+                            .foregroundColor(DSColors.cyan)
+                        Text("VALUE")
+                            .font(.system(size: 9, weight: .semibold))
+                            .tracking(1.2)
+                            .foregroundColor(DSColors.textTertiary)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("$212")
+                            .font(.system(size: 18, weight: .bold, design: .rounded).monospacedDigit())
+                            .foregroundColor(DSColors.textPrimary)
+                        Text("PRICE")
+                            .font(.system(size: 9, weight: .semibold))
+                            .tracking(1.2)
+                            .foregroundColor(DSColors.textTertiary)
+                    }
+                }
             }
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Price is an opinion.")
+                    .dsTitle()
+                Text("Value is a number.")
+                    .dsTitle()
+                    .foregroundColor(DSColors.cyan)
+            }
+
+            Text("Build a discounted-cash-flow valuation in minutes and see the margin of safety for yourself.")
+                .dsSubheadline()
         }
     }
 

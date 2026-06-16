@@ -192,28 +192,33 @@ struct ForecastHomeView: View {
             selectTicker(ticker)
         } label: {
             HStack(spacing: DSSpacing.m) {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: DSSpacing.s) {
-                        Text(ticker.symbol)
-                            .font(DSTypography.headline)
-                            .foregroundColor(DSColors.textPrimary)
-                        
-                        DSInlineBadge(ticker.sector, style: .neutral)
-                    }
-                    
-                    Text(ticker.name)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(ticker.symbol)
+                        .font(DSTypography.headline)
+                        .foregroundColor(DSColors.textPrimary)
+
+                    Text("\(ticker.name) · \(ticker.sector)")
                         .font(DSTypography.caption)
-                        .foregroundColor(DSColors.textSecondary)
+                        .foregroundColor(DSColors.textTertiary)
                         .lineLimit(1)
-                    
-                    let currentPrice = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
-                    Text(Formatters.formatCurrency(currentPrice))
-                        .font(.system(size: 13, weight: .semibold, design: .rounded).monospacedDigit())
-                        .foregroundColor(DSColors.textSecondary)
                 }
-                
+
                 Spacer(minLength: DSSpacing.m)
-                
+
+                // Price + value verdict (price vs predicted value)
+                VStack(alignment: .trailing, spacing: 4) {
+                    let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
+                    let verdict = demoValueVerdict(for: ticker)
+
+                    Text(Formatters.formatCurrency(price))
+                        .font(.system(size: 15, weight: .semibold, design: .rounded).monospacedDigit())
+                        .foregroundColor(DSColors.textPrimary)
+
+                    Text(verdict.text)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded).monospacedDigit())
+                        .foregroundColor(verdict.color)
+                }
+
                 // Watchlist button
                 watchlistButton(for: ticker)
             }
@@ -265,6 +270,22 @@ struct ForecastHomeView: View {
         flowState.selectedTicker = ticker
         flowState.generateRevenueDrivers()
         path.append(.companyContext)
+    }
+
+    // Demo value verdict (price vs predicted value) — deterministic per symbol,
+    // consistent with this screen's existing mock market data.
+    private func demoValueVerdict(for ticker: DCFTicker) -> (text: String, color: Color) {
+        let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
+        guard price > 0 else { return ("—", DSColors.textTertiary) }
+        var h: UInt64 = 1469598103934665603
+        for b in ticker.symbol.utf8 { h = (h ^ UInt64(b)) &* 1099511628211 }
+        let factor = 0.80 + Double(h % 1000) / 1000.0 * 0.45 // 0.80–1.25
+        let value = price * factor
+        let mos = (value - price) / price
+        let amount = Formatters.formatCurrency(value)
+        if abs(mos) < 0.02 { return ("value \(amount) ◆", DSColors.sky) }
+        if mos >= 0 { return ("value \(amount) ▲", DSColors.positive) }
+        return ("value \(amount) ▼", DSColors.negative)
     }
     
     private func performSearch(_ query: String) {

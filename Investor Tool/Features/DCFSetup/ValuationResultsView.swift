@@ -222,16 +222,37 @@ struct ValuationResultsView: View {
     
     private var heroCard: some View {
         VStack(alignment: .leading, spacing: DSSpacing.l) {
-            Text("Intrinsic Value")
-                .font(DSTypography.caption)
-                .foregroundColor(DSColors.textSecondary)
-                .textCase(.uppercase)
-                .tracking(0.5)
-            
-            Text("$\(flowState.derivedIntrinsicValue, specifier: "%.2f")")
-                .font(DSTypography.displayNumber)
-                .foregroundColor(DSColors.textPrimary)
-                .animation(Motion.emphasize, value: flowState.derivedIntrinsicValue)
+            // Value Gauge hero — the signature: predicted value vs market price
+            HStack(alignment: .center, spacing: DSSpacing.l) {
+                VStack(alignment: .leading, spacing: DSSpacing.s) {
+                    Text("Intrinsic Value / Share")
+                        .font(DSTypography.caption)
+                        .foregroundColor(DSColors.textSecondary)
+                        .textCase(.uppercase)
+                        .tracking(0.5)
+
+                    Text("$\(flowState.derivedIntrinsicValue, specifier: "%.2f")")
+                        .font(DSTypography.displayNumber)
+                        .foregroundColor(DSColors.cyan)
+                        .shadow(color: DSColors.accentGlow, radius: 18)
+                        .animation(Motion.emphasize, value: flowState.derivedIntrinsicValue)
+
+                    Text(String(format: "%@ %+.1f%% margin of safety vs $%.2f",
+                                flowState.derivedUpsidePercent >= 0 ? "▲" : "▼",
+                                flowState.derivedUpsidePercent,
+                                flowState.baselineCurrentPrice))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(flowState.derivedUpsidePercent >= 0 ? DSColors.positive : DSColors.negative)
+                }
+
+                Spacer(minLength: DSSpacing.m)
+
+                ValueGauge(
+                    price: flowState.baselineCurrentPrice,
+                    value: flowState.derivedIntrinsicValue
+                )
+                .frame(width: 50, height: 138)
+            }
             
             // Intrinsic Value Sparkline
             VStack(alignment: .leading, spacing: 6) {

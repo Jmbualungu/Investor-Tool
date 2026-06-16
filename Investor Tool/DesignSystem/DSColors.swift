@@ -7,29 +7,32 @@ enum DSColors {
     static let background = Color(hex: "0A0F1F")
 
     /// Elevated surface — cards, sheets
-    static let surface = Color(hex: "0E162B")
+    static let surface = Color(hex: "0E1426")
 
     /// Secondary surface — nested cards, inputs, raised/hover
-    static let surface2 = Color(hex: "121C35")
+    static let surface2 = Color(hex: "131C33")
+
+    /// Tertiary surface — deepest raised layer
+    static let surface3 = Color(hex: "1A2440")
 
     // MARK: - Dividers & Borders
 
     /// Standard border and divider color
-    static let border = Color(hex: "22345F")
+    static let border = Color(hex: "1E2740")
 
-    /// Subtle divider (lighter opacity)
-    static let divider = Color(hex: "22345F").opacity(0.6)
+    /// Subtle divider (softer line)
+    static let divider = Color(hex: "161E33")
 
     // MARK: - Text Colors
 
     /// Primary text — off-white
     static let textPrimary = Color(hex: "F6F8FC")
 
-    /// Secondary text — muted
-    static let textSecondary = Color(hex: "AAB6D3")
+    /// Secondary text — muted ("dim")
+    static let textSecondary = Color(hex: "8A97B5")
 
-    /// Tertiary text — subtle labels/metadata
-    static let textTertiary = Color(hex: "6F7EA3")
+    /// Tertiary text — subtle labels/metadata ("faint")
+    static let textTertiary = Color(hex: "5A6685")
 
     // MARK: - Accent & Brand (intelligence = blue/cyan)
 
@@ -37,21 +40,21 @@ enum DSColors {
     static let accent = Color(hex: "125BFF")
 
     /// Data/highlight glow — bright cyan
-    static let cyan = Color(hex: "00EDFF")
+    static let cyan = Color(hex: "00E0FF")
 
     /// Soft sky glow — secondary accent
     static let sky = Color(hex: "7FD8FF")
 
     /// Accent glow for shadows (cyan)
-    static let accentGlow = Color(hex: "00EDFF").opacity(0.28)
+    static let accentGlow = Color(hex: "00E0FF").opacity(0.30)
 
-    // MARK: - Semantic Colors (financial meaning only)
+    // MARK: - Semantic Colors (value verdict only — green=under, red=over)
 
     /// Positive / undervalued / margin-of-safety
-    static let positive = Color(hex: "22C55E")
+    static let positive = Color(hex: "2FE0A0")
 
     /// Negative / overvalued / downside
-    static let negative = Color(hex: "FB7185")
+    static let negative = Color(hex: "FF5E6C")
 
     /// Success (alias for positive)
     static let success = positive
@@ -60,7 +63,7 @@ enum DSColors {
     static let danger = negative
 
     /// Warning — caution / fragile assumptions
-    static let warning = Color(hex: "FBBF24")
+    static let warning = Color(hex: "E8B04A")
     
     // MARK: - Legacy Support (deprecated but kept for compatibility)
     

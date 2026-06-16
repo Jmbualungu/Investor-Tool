@@ -17,7 +17,23 @@ struct WatchlistView: View {
             .compactMap { symbol in
                 repository.findTicker(bySymbol: symbol)
             }
-            .sorted { $0.symbol < $1.symbol }
+            .sorted { marginOfSafety(for: $0) > marginOfSafety(for: $1) }
+    }
+
+    // Demo intrinsic value (deterministic per symbol) — consistent with this
+    // screen's existing mock market data until live valuations are wired.
+    private func demoIntrinsicValue(for ticker: DCFTicker) -> Double {
+        let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
+        var h: UInt64 = 1469598103934665603
+        for b in ticker.symbol.utf8 { h = (h ^ UInt64(b)) &* 1099511628211 }
+        let factor = 0.80 + Double(h % 1000) / 1000.0 * 0.45 // 0.80–1.25
+        return price * factor
+    }
+
+    private func marginOfSafety(for ticker: DCFTicker) -> Double {
+        let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
+        guard price > 0 else { return 0 }
+        return (demoIntrinsicValue(for: ticker) - price) / price
     }
     
     var body: some View {
@@ -68,54 +84,44 @@ struct WatchlistView: View {
             startForecast(for: ticker)
         } label: {
             HStack(spacing: DSSpacing.m) {
-                // Left: Symbol + Name
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: DSSpacing.s) {
-                        Text(ticker.symbol)
-                            .font(DSTypography.headline)
-                            .foregroundColor(DSColors.textPrimary)
-                        
-                        DSInlineBadge(ticker.sector, style: .neutral)
-                    }
-                    
+                // Left: micro Value Gauge — predicted value vs market price
+                let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
+                let value = demoIntrinsicValue(for: ticker)
+                let mos = marginOfSafety(for: ticker)
+                let isUnder = mos >= 0
+                let isFair = abs(mos) < 0.02
+
+                MicroValueGauge(price: price, value: value)
+
+                // Middle: Symbol + Name
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(ticker.symbol)
+                        .font(DSTypography.headline)
+                        .foregroundColor(DSColors.textPrimary)
+
                     Text(ticker.name)
                         .font(DSTypography.caption)
-                        .foregroundColor(DSColors.textSecondary)
+                        .foregroundColor(DSColors.textTertiary)
                         .lineLimit(1)
                 }
-                
+
                 Spacer(minLength: DSSpacing.m)
-                
-                // Right: Price info + Sparkline
-                VStack(alignment: .trailing, spacing: 6) {
-                    let currentPrice = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
-                    let dayChange = MarketMock.mockDayChange(symbol: ticker.symbol)
-                    let isPositive = dayChange.absolute >= 0
-                    
-                    // Current price
-                    Text(Formatters.formatCurrency(currentPrice))
+
+                // Right: intrinsic value + margin of safety
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(Formatters.formatCurrency(value))
                         .font(.system(size: 16, weight: .semibold, design: .rounded).monospacedDigit())
                         .foregroundColor(DSColors.textPrimary)
-                    
-                    // Day change
-                    HStack(spacing: 4) {
-                        Text(String(format: "%+.2f", dayChange.absolute))
-                            .font(.system(size: 13, weight: .medium, design: .rounded).monospacedDigit())
-                            .foregroundColor(isPositive ? DSColors.positive : DSColors.negative)
-                        
-                        Text(String(format: "(%+.2f%%)", dayChange.percent))
-                            .font(.system(size: 13, weight: .medium, design: .rounded).monospacedDigit())
-                            .foregroundColor(isPositive ? DSColors.positive : DSColors.negative)
-                    }
-                    
-                    // Mini sparkline
-                    let series = MarketMock.mockPriceSeries(symbol: ticker.symbol, range: .oneDay)
-                    Sparkline(
-                        points: series,
-                        height: 24,
-                        lineColor: isPositive ? DSColors.positive : DSColors.negative
+
+                    Text(
+                        isFair
+                            ? String(format: "fair · %+.1f%%", mos * 100)
+                            : isUnder
+                                ? String(format: "+%.0f%% safety", mos * 100)
+                                : String(format: "%.0f%% rich", mos * 100)
                     )
-                    .frame(width: 80)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded).monospacedDigit())
+                    .foregroundColor(isFair ? DSColors.sky : (isUnder ? DSColors.positive : DSColors.negative))
                 }
             }
             .padding(DSSpacing.l)

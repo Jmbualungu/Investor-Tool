@@ -354,13 +354,14 @@ struct SensitivityAnalysisView: View {
                                 let isBase = xAdj == 0.0 && yAdj == 0.0
                                 
                                 Text("$\(value, specifier: "%.0f")")
-                                    .font(isBase ? DSTypography.caption.weight(.bold) : DSTypography.caption)
-                                    .foregroundColor(isBase ? DSColors.accent : DSColors.textPrimary)
+                                    .font(isBase ? DSTypography.caption.weight(.bold) : DSTypography.caption.weight(.semibold))
+                                    .foregroundColor(Color(hex: "06121F"))
                                     .frame(width: 80, height: 50)
-                                    .background(isBase ? DSColors.accent.opacity(0.15) : DSColors.surface)
+                                    .background(heatColor(forValue: value))
                                     .overlay(
                                         Rectangle()
-                                            .stroke(DSColors.border, lineWidth: 0.5)
+                                            .stroke(isBase ? DSColors.cyan : DSColors.border.opacity(0.35),
+                                                    lineWidth: isBase ? 1.6 : 0.5)
                                     )
                             }
                         }
@@ -377,9 +378,44 @@ struct SensitivityAnalysisView: View {
                         .stroke(DSColors.border, lineWidth: 1)
                 )
             }
+
+            heatLegend
         }
     }
     
+    // Diverging value heat-map: green = cushion vs price, red = paying up.
+    private func heatColor(forValue value: Double) -> Color {
+        let price = max(flowState.baselineCurrentPrice, 0.01)
+        let r = value / price
+        if r >= 1.25 { return Color(hex: "2FE0A0") }
+        if r >= 1.08 { return Color(hex: "46D493") }
+        if r >= 1.00 { return Color(hex: "8FC26A") }
+        if r >= 0.94 { return Color(hex: "C9BD57") }
+        if r >= 0.88 { return Color(hex: "E8B04A") }
+        if r >= 0.80 { return Color(hex: "F47E5D") }
+        return Color(hex: "FF5E6C")
+    }
+
+    private var heatLegend: some View {
+        HStack(spacing: DSSpacing.s) {
+            Text("overvalued")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(DSColors.textTertiary)
+            LinearGradient(
+                colors: [Color(hex: "FF5E6C"), Color(hex: "E8B04A"), Color(hex: "2FE0A0")],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(width: 120, height: 7)
+            .clipShape(Capsule())
+            Text("undervalued")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(DSColors.textTertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, DSSpacing.s)
+    }
+
     private func gridAxisLabel(_ adjustment: Double, for variable: GridVariable) -> String {
         if adjustment == 0.0 {
             return "Base"
