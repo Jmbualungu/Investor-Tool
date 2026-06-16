@@ -10,14 +10,35 @@ import SwiftUI
 struct AppShellView: View {
     @StateObject private var flowState = DCFFlowState()
     @State private var selectedTab: Tab = .forecast
-    
+
     enum Tab {
         case watchlist
         case forecast
         case library
         case settings
     }
-    
+
+    init() {
+        // Valtyde tab bar: translucent navy, cyan active, faint inactive.
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundColor = UIColor(DSColors.surface).withAlphaComponent(0.92)
+        let cyan = UIColor(DSColors.cyan)
+        let faint = UIColor(DSColors.textTertiary)
+        for item in [
+            appearance.stackedLayoutAppearance,
+            appearance.inlineLayoutAppearance,
+            appearance.compactInlineLayoutAppearance,
+        ] {
+            item.selected.iconColor = cyan
+            item.selected.titleTextAttributes = [.foregroundColor: cyan]
+            item.normal.iconColor = faint
+            item.normal.titleTextAttributes = [.foregroundColor: faint]
+        }
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
             // Watchlist Tab
@@ -52,7 +73,7 @@ struct AppShellView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .environmentObject(flowState)
-        .tint(DSColors.accent)
+        .tint(DSColors.cyan)
     }
 }
 
