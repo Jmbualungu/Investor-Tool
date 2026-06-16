@@ -14,13 +14,13 @@ struct DSGlassCard<Content: View>: View {
         }
         .padding(DSSpacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.ultraThinMaterial)
+        .background(DSColors.surface)
         .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous)
-                .stroke(DSColors.border, lineWidth: 1)
+                .stroke(DSColors.sky.opacity(0.16), lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.35), radius: 24, x: 0, y: 12)
     }
 }
 

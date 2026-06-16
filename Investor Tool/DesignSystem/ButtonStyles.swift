@@ -16,22 +16,29 @@ struct PrimaryCTAButtonStyle: ButtonStyle {
         configuration.label
             .font(DSTypography.body)
             .fontWeight(.semibold)
-            .foregroundColor(.black)
+            .foregroundColor(DSColors.textPrimary)
             .frame(maxWidth: .infinity)
             .frame(height: DSSpacing.buttonHeightStandard)
             .background(
-                isEnabled
-                    ? DSColors.accent
-                    : DSColors.accent.opacity(0.5)
+                LinearGradient(
+                    colors: [DSColors.accent, DSColors.cyan],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .opacity(isEnabled ? 1.0 : 0.5)
             )
             .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: DSSpacing.radiusPill, style: .continuous)
+                    .stroke(DSColors.sky.opacity(isEnabled ? 0.45 : 0), lineWidth: 1)
+            )
             .shadow(
                 color: isEnabled && !configuration.isPressed
-                    ? DSColors.accent.opacity(0.3)
+                    ? DSColors.cyan.opacity(0.30)
                     : Color.clear,
-                radius: 8,
+                radius: 16,
                 x: 0,
-                y: 4
+                y: 6
             )
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
             .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)

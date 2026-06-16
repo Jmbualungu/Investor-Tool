@@ -1,60 +1,66 @@
 import SwiftUI
 
 enum DSColors {
-    // MARK: - Background Colors (Semantic, adapts to light/dark mode)
-    
-    /// Primary background - deep, calm dark in dark mode
-    static let background = Color(.systemBackground)
-    
-    /// Elevated surface - cards, sheets
-    static let surface = Color(.secondarySystemBackground)
-    
-    /// Secondary surface - nested cards, inputs
-    static let surface2 = Color(.tertiarySystemBackground)
-    
+    // MARK: - Valtyde Brand System v1.1 (fixed dark navy theme)
+
+    /// Primary background — deep navy
+    static let background = Color(hex: "0A0F1F")
+
+    /// Elevated surface — cards, sheets
+    static let surface = Color(hex: "0E162B")
+
+    /// Secondary surface — nested cards, inputs, raised/hover
+    static let surface2 = Color(hex: "121C35")
+
     // MARK: - Dividers & Borders
-    
+
     /// Standard border and divider color
-    static let border = Color(.separator)
-    
+    static let border = Color(hex: "22345F")
+
     /// Subtle divider (lighter opacity)
-    static let divider = Color(.separator).opacity(0.6)
-    
-    // MARK: - Text Colors (Semantic)
-    
-    /// Primary text color
-    static let textPrimary = Color(.label)
-    
-    /// Secondary text color
-    static let textSecondary = Color(.secondaryLabel)
-    
-    /// Tertiary text color (hints, placeholders)
-    static let textTertiary = Color(.tertiaryLabel)
-    
-    // MARK: - Accent & Brand
-    
-    /// Primary accent color - uses app accent from Assets
-    static let accent = Color.accentColor
-    
-    /// Accent glow for shadows
-    static let accentGlow = Color.accentColor.opacity(0.3)
-    
-    // MARK: - Semantic Colors
-    
-    /// Positive/success color (green)
-    static let positive = Color.green
-    
-    /// Negative/error color (red)
-    static let negative = Color.red
-    
+    static let divider = Color(hex: "22345F").opacity(0.6)
+
+    // MARK: - Text Colors
+
+    /// Primary text — off-white
+    static let textPrimary = Color(hex: "F6F8FC")
+
+    /// Secondary text — muted
+    static let textSecondary = Color(hex: "AAB6D3")
+
+    /// Tertiary text — subtle labels/metadata
+    static let textTertiary = Color(hex: "6F7EA3")
+
+    // MARK: - Accent & Brand (intelligence = blue/cyan)
+
+    /// Primary accent — electric blue
+    static let accent = Color(hex: "125BFF")
+
+    /// Data/highlight glow — bright cyan
+    static let cyan = Color(hex: "00EDFF")
+
+    /// Soft sky glow — secondary accent
+    static let sky = Color(hex: "7FD8FF")
+
+    /// Accent glow for shadows (cyan)
+    static let accentGlow = Color(hex: "00EDFF").opacity(0.28)
+
+    // MARK: - Semantic Colors (financial meaning only)
+
+    /// Positive / undervalued / margin-of-safety
+    static let positive = Color(hex: "22C55E")
+
+    /// Negative / overvalued / downside
+    static let negative = Color(hex: "FB7185")
+
     /// Success (alias for positive)
     static let success = positive
-    
+
     /// Danger (alias for negative)
     static let danger = negative
-    
-    /// Warning color
-    static let warning = Color.orange
+
+    /// Warning — caution / fragile assumptions
+    static let warning = Color(hex: "FBBF24")
     
     // MARK: - Legacy Support (deprecated but kept for compatibility)
     

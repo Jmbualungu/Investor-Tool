@@ -1,6 +1,16 @@
 import SwiftUI
 
 enum DSTypography {
+    // MARK: - Orbitron display (Valtyde brand — use sparingly: logo, splash, eyebrows)
+    /// Orbitron is bundled (Resources/Fonts/Orbitron.ttf, registered via UIAppFonts).
+    static func orbitron(_ size: CGFloat, weight: Font.Weight = .bold) -> Font {
+        Font.custom("Orbitron", size: size).weight(weight)
+    }
+    static let brandWordmark = orbitron(34, weight: .bold)
+    static let brandWordmarkLarge = orbitron(48, weight: .bold)
+    /// Uppercase, wide-tracked section label (apply .tracking + .textCase(.uppercase) at call site)
+    static let eyebrow = orbitron(12, weight: .medium)
+
     // Display numbers (Robinhood-style monospaced large numbers)
     static let displayNumber = Font.system(size: 52, weight: .bold, design: .rounded).monospacedDigit()
     static let displayNumberLarge = Font.system(size: 64, weight: .bold, design: .rounded).monospacedDigit()

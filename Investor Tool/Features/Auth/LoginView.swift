@@ -17,17 +17,20 @@ struct LoginView: View {
             VStack(spacing: 24) {
                 // Logo/Branding
                 VStack(spacing: 8) {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(.system(size: 60))
-                        .foregroundColor(.accentColor)
+                    Image("ValtydeMark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 96, height: 96)
+                        .shadow(color: DSColors.cyan.opacity(0.4), radius: 24)
 
-                    Text("Valtyde")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    
-                    Text(isSignUp ? "Create your account" : "Welcome back")
+                    Text("VALTYDE")
+                        .font(DSTypography.brandWordmark)
+                        .tracking(2)
+                        .foregroundColor(DSColors.textPrimary)
+
+                    Text(isSignUp ? "Create your account" : "Value, not vibes.")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(DSColors.textSecondary)
                 }
                 .padding(.top, 60)
                 

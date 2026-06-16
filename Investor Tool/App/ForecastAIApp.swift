@@ -64,6 +64,7 @@ struct ForecastAIApp: App {
                 #endif
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .preferredColorScheme(.dark)
             #if DEBUG
             .debugLayoutInstrumentation()
             #endif
