@@ -184,7 +184,7 @@ struct ValuationResultsView: View {
                         }
                     }
                     
-                    jumpButton(title: "Sensitivity", icon: "slider.horizontal.3") {
+                    jumpButton(title: "Thesis Surface", icon: "slider.horizontal.3") {
                         onShowSensitivity()
                     }
                 }
@@ -703,7 +703,7 @@ struct ValuationResultsView: View {
     
     private var bottomBar: some View {
         DSBottomBar {
-            DSBottomBarPrimaryButton("Sensitivity Analysis", icon: "arrow.right") {
+            DSBottomBarPrimaryButton("Thesis Surface", icon: "arrow.right") {
                 onShowSensitivity()
             }
         } secondary: {

@@ -79,7 +79,7 @@ struct SensitivityAnalysisView: View {
                 }
             }
         )
-        .navigationTitle("Sensitivity")
+        .navigationTitle("Thesis Surface")
         .navigationBarTitleDisplayMode(.inline)
     }
     
@@ -87,7 +87,7 @@ struct SensitivityAnalysisView: View {
     
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: DSSpacing.s) {
-            Text("Sensitivity Analysis")
+            Text("Thesis Surface")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(DSColors.textPrimary)
             
@@ -244,7 +244,7 @@ struct SensitivityAnalysisView: View {
             
             Text(String(format: "%+.1f%%", result.upside))
                 .font(isBase ? DSTypography.body.weight(.semibold) : DSTypography.body)
-                .foregroundColor(result.upside >= 0 ? DSColors.accent : .red)
+                .foregroundColor(result.upside >= 0 ? DSColors.positive : DSColors.negative)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(DSSpacing.m)
