@@ -22,6 +22,9 @@ xcuserdata/
 .build/
 .swiftpm/
 
+# xcodebuild derived data (run-simulator.sh / audit scripts build here)
+build/
+
 ## Playgrounds
 timeline.xctimeline
 playground.xcworkspace
