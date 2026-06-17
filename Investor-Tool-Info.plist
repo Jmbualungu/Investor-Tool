@@ -52,5 +52,7 @@
 	<string>$(SUPABASE_PUBLISHABLE_KEY)</string>
 	<key>SUPABASE_URL</key>
 	<string>$(SUPABASE_URL)</string>
+	<key>FINNHUB_API_KEY</key>
+	<string>$(FINNHUB_API_KEY)</string>
 </dict>
 </plist>

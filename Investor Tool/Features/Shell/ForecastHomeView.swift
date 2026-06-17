@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ForecastHomeView: View {
     @EnvironmentObject private var flowState: DCFFlowState
+    @StateObject private var quotes = QuoteStore()
     @State private var path: [Route] = []
     @State private var searchQuery: String = ""
     @State private var searchResults: [DCFTicker] = []
@@ -46,7 +47,7 @@ struct ForecastHomeView: View {
                         }
                     }
                     .padding(DSSpacing.l)
-                    .padding(.bottom, DSSpacing.xl)
+                    .padding(.bottom, 90) // clearance for the floating tab bar
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -57,6 +58,7 @@ struct ForecastHomeView: View {
             }
             .onAppear {
                 searchResults = repository.popularTickers
+                loadQuotes(for: repository.popularTickers)
             }
         }
     }
@@ -205,18 +207,18 @@ struct ForecastHomeView: View {
 
                 Spacer(minLength: DSSpacing.m)
 
-                // Price + value verdict (price vs predicted value)
+                // Live price + intraday change (over the course of the day)
                 VStack(alignment: .trailing, spacing: 4) {
-                    let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
-                    let verdict = demoValueVerdict(for: ticker)
+                    let quote = quotes.quote(for: ticker.symbol)
+                    let day = quote.intradayLabel
 
-                    Text(Formatters.formatCurrency(price))
+                    Text(Formatters.formatCurrency(quote.price))
                         .font(.system(size: 15, weight: .semibold, design: .rounded).monospacedDigit())
                         .foregroundColor(DSColors.textPrimary)
 
-                    Text(verdict.text)
+                    Text(day.text)
                         .font(.system(size: 11, weight: .semibold, design: .rounded).monospacedDigit())
-                        .foregroundColor(verdict.color)
+                        .foregroundColor(day.color)
                 }
 
                 // Watchlist button
@@ -272,24 +274,15 @@ struct ForecastHomeView: View {
         path.append(.companyContext)
     }
 
-    // Demo value verdict (price vs predicted value) — deterministic per symbol,
-    // consistent with this screen's existing mock market data.
-    private func demoValueVerdict(for ticker: DCFTicker) -> (text: String, color: Color) {
-        let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
-        guard price > 0 else { return ("—", DSColors.textTertiary) }
-        var h: UInt64 = 1469598103934665603
-        for b in ticker.symbol.utf8 { h = (h ^ UInt64(b)) &* 1099511628211 }
-        let factor = 0.80 + Double(h % 1000) / 1000.0 * 0.45 // 0.80–1.25
-        let value = price * factor
-        let mos = (value - price) / price
-        let amount = Formatters.formatCurrency(value)
-        if abs(mos) < 0.02 { return ("value \(amount) ◆", DSColors.sky) }
-        if mos >= 0 { return ("value \(amount) ▲", DSColors.positive) }
-        return ("value \(amount) ▼", DSColors.negative)
-    }
-    
     private func performSearch(_ query: String) {
         searchResults = repository.search(query: query)
+        loadQuotes(for: searchResults)
+    }
+
+    /// Fetch live quotes for the visible tickers (live with mock fallback).
+    private func loadQuotes(for tickers: [DCFTicker]) {
+        let symbols = tickers.map(\.symbol)
+        Task { await quotes.load(symbols: symbols) }
     }
     
     @ViewBuilder

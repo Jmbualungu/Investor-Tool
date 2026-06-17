@@ -18,60 +18,34 @@ struct AppShellView: View {
         case settings
     }
 
-    init() {
-        // Valtyde tab bar: translucent navy, cyan active, faint inactive.
-        let appearance = UITabBarAppearance()
-        appearance.configureWithDefaultBackground()
-        appearance.backgroundColor = UIColor(DSColors.surface).withAlphaComponent(0.92)
-        let cyan = UIColor(DSColors.cyan)
-        let faint = UIColor(DSColors.textTertiary)
-        for item in [
-            appearance.stackedLayoutAppearance,
-            appearance.inlineLayoutAppearance,
-            appearance.compactInlineLayoutAppearance,
-        ] {
-            item.selected.iconColor = cyan
-            item.selected.titleTextAttributes = [.foregroundColor: cyan]
-            item.normal.iconColor = faint
-            item.normal.titleTextAttributes = [.foregroundColor: faint]
-        }
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
-    }
-
     var body: some View {
+        // System tab bar is hidden per-tab; the custom ValtydeTabBar is overlaid
+        // on top. TabView still owns selection + per-tab state preservation.
         TabView(selection: $selectedTab) {
-            // Watchlist Tab
             WatchlistView()
-                .tabItem {
-                    Label("Watchlist", systemImage: "star.fill")
-                }
+                .toolbar(.hidden, for: .tabBar)
                 .tag(Tab.watchlist)
-            
-            // Forecast Tab (Main)
+
             ForecastHomeView()
-                .tabItem {
-                    Label("Forecast", systemImage: "sparkles")
-                }
+                .toolbar(.hidden, for: .tabBar)
                 .tag(Tab.forecast)
-            
-            // Library Tab
+
             LibraryView()
-                .tabItem {
-                    Label("Library", systemImage: "books.vertical.fill")
-                }
+                .toolbar(.hidden, for: .tabBar)
                 .tag(Tab.library)
-            
-            // Settings Tab
+
             NavigationStack {
                 SettingsView()
             }
-            .tabItem {
-                Label("Settings", systemImage: "gearshape.fill")
-            }
+            .toolbar(.hidden, for: .tabBar)
             .tag(Tab.settings)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .bottom) {
+            ValtydeTabBar(selectedTab: $selectedTab)
+                .padding(.horizontal, DSSpacing.m)
+                .padding(.bottom, DSSpacing.s)
+        }
         .environmentObject(flowState)
         .tint(DSColors.cyan)
     }

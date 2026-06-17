@@ -9,8 +9,9 @@ import SwiftUI
 
 struct WatchlistView: View {
     @EnvironmentObject private var flowState: DCFFlowState
+    @StateObject private var quotes = QuoteStore()
     @State private var path: [Route] = []
-    
+
     private var watchedTickers: [DCFTicker] {
         let repository = TickerRepository.shared
         return Array(flowState.watchlistSymbols)
@@ -20,20 +21,23 @@ struct WatchlistView: View {
             .sorted { marginOfSafety(for: $0) > marginOfSafety(for: $1) }
     }
 
-    // Demo intrinsic value (deterministic per symbol) — consistent with this
-    // screen's existing mock market data until live valuations are wired.
-    private func demoIntrinsicValue(for ticker: DCFTicker) -> Double {
-        let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
+    // Deterministic value/price ratio per symbol (0.80–1.25) — a demo intrinsic
+    // multiplier until live DCF valuations feed the gauge.
+    private func valueFactor(for symbol: String) -> Double {
         var h: UInt64 = 1469598103934665603
-        for b in ticker.symbol.utf8 { h = (h ^ UInt64(b)) &* 1099511628211 }
-        let factor = 0.80 + Double(h % 1000) / 1000.0 * 0.45 // 0.80–1.25
-        return price * factor
+        for b in symbol.utf8 { h = (h ^ UInt64(b)) &* 1099511628211 }
+        return 0.80 + Double(h % 1000) / 1000.0 * 0.45
     }
 
+    // Demo intrinsic value anchored to the live price so the gauge stays sensible.
+    private func demoIntrinsicValue(for ticker: DCFTicker) -> Double {
+        quotes.quote(for: ticker.symbol).price * valueFactor(for: ticker.symbol)
+    }
+
+    // Margin of safety is the value/price gap — equal to valueFactor − 1, so the
+    // ordering is stable whether prices are live or mock.
     private func marginOfSafety(for ticker: DCFTicker) -> Double {
-        let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
-        guard price > 0 else { return 0 }
-        return (demoIntrinsicValue(for: ticker) - price) / price
+        valueFactor(for: ticker.symbol) - 1
     }
     
     var body: some View {
@@ -64,6 +68,7 @@ struct WatchlistView: View {
                                 .stroke(DSColors.border, lineWidth: 1)
                         )
                         .padding(DSSpacing.l)
+                        .padding(.bottom, 80) // clearance for the floating tab bar
                     }
                 }
             }
@@ -72,6 +77,9 @@ struct WatchlistView: View {
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Route.self) { route in
                 routeDestination(for: route)
+            }
+            .task(id: flowState.watchlistSymbols) {
+                await quotes.load(symbols: watchedTickers.map(\.symbol))
             }
         }
     }
@@ -84,8 +92,9 @@ struct WatchlistView: View {
             startForecast(for: ticker)
         } label: {
             HStack(spacing: DSSpacing.m) {
-                // Left: micro Value Gauge — predicted value vs market price
-                let price = MarketMock.mockCurrentPrice(symbol: ticker.symbol)
+                // Left: micro Value Gauge — predicted value vs live market price
+                let quote = quotes.quote(for: ticker.symbol)
+                let price = quote.price
                 let value = demoIntrinsicValue(for: ticker)
                 let mos = marginOfSafety(for: ticker)
                 let isUnder = mos >= 0
@@ -107,11 +116,15 @@ struct WatchlistView: View {
 
                 Spacer(minLength: DSSpacing.m)
 
-                // Right: intrinsic value + margin of safety
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(Formatters.formatCurrency(value))
+                // Right: live price, intraday change, margin of safety
+                VStack(alignment: .trailing, spacing: 3) {
+                    Text(Formatters.formatCurrency(price))
                         .font(.system(size: 16, weight: .semibold, design: .rounded).monospacedDigit())
                         .foregroundColor(DSColors.textPrimary)
+
+                    Text(quote.intradayLabel.text)
+                        .font(.system(size: 10.5, weight: .semibold, design: .rounded).monospacedDigit())
+                        .foregroundColor(quote.intradayLabel.color)
 
                     Text(
                         isFair
@@ -120,7 +133,7 @@ struct WatchlistView: View {
                                 ? String(format: "+%.0f%% safety", mos * 100)
                                 : String(format: "%.0f%% rich", mos * 100)
                     )
-                    .font(.system(size: 11, weight: .semibold, design: .rounded).monospacedDigit())
+                    .font(.system(size: 10.5, weight: .semibold, design: .rounded).monospacedDigit())
                     .foregroundColor(isFair ? DSColors.sky : (isUnder ? DSColors.positive : DSColors.negative))
                 }
             }
