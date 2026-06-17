@@ -835,12 +835,19 @@ struct ValuationResultsView: View {
     // MARK: - Disclaimer Footer
     
     private var disclaimerFooter: some View {
-        Text(Copy.educationalPurposes)
-            .font(.system(size: 11))
-            .foregroundColor(DSColors.textTertiary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-            .padding(.top, DSSpacing.m)
+        VStack(spacing: DSSpacing.xs) {
+            Text("Figures are illustrative index values from your assumptions — not per-share dollars or a price target.")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(DSColors.textTertiary)
+                .multilineTextAlignment(.center)
+
+            Text(Copy.educationalPurposes)
+                .font(.system(size: 11))
+                .foregroundColor(DSColors.textTertiary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, DSSpacing.m)
     }
 }
 

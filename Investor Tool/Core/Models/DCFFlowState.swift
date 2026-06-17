@@ -103,7 +103,9 @@ class DCFFlowState: ObservableObject {
             fcfIndex: derivedFreeCashFlowIndex,
             horizonYears: investmentLens.horizon.years,
             discountRate: valuationAssumptions.discountRate,
-            terminalGrowth: valuationAssumptions.terminalGrowth
+            terminalGrowth: valuationAssumptions.terminalGrowth,
+            terminalMethod: valuationAssumptions.terminalMethod,
+            exitMultiple: valuationAssumptions.exitMultiple
         )
     }
 

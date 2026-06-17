@@ -211,62 +211,89 @@ struct ValuationAssumptionsView: View {
     }
     
     private func methodRow(_ method: TerminalMethod) -> some View {
-        Button {
-            if method == .perpetuity {
+        let isSelected = flowState.valuationAssumptions.terminalMethod == method
+        return VStack(spacing: 0) {
+            Button {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     flowState.valuationAssumptions.terminalMethod = method
+                    // Seed a sensible default the first time exit multiple is chosen.
+                    if method == .exitMultiple, flowState.valuationAssumptions.exitMultiple == nil {
+                        flowState.valuationAssumptions.exitMultiple = DCFEngine.defaultExitMultiple
+                    }
                 }
-            }
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(method.rawValue)
-                        .font(DSTypography.body)
-                        .foregroundColor(
-                            method == .exitMultiple
-                                ? DSColors.textTertiary
-                                : DSColors.textPrimary
-                        )
-                    
-                    if method == .exitMultiple {
-                        Text("Coming soon")
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(method.rawValue)
+                            .font(DSTypography.body)
+                            .foregroundColor(DSColors.textPrimary)
+
+                        Text(method == .exitMultiple
+                            ? "Terminal value = multiple × final-year FCF"
+                            : "Terminal value grows forever at the terminal rate")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(DSColors.textTertiary)
                     }
+
+                    Spacer()
+
+                    if isSelected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(DSColors.accent)
+                            .transition(.scale.combined(with: .opacity))
+                    } else {
+                        Circle()
+                            .stroke(DSColors.border, lineWidth: 2)
+                            .frame(width: 20, height: 20)
+                    }
                 }
-                
-                Spacer()
-                
-                if flowState.valuationAssumptions.terminalMethod == method {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(DSColors.accent)
-                        .transition(.scale.combined(with: .opacity))
-                } else if method == .perpetuity {
-                    Circle()
-                        .stroke(DSColors.border, lineWidth: 2)
-                        .frame(width: 20, height: 20)
-                }
+                .padding(DSSpacing.m)
+                .background(isSelected ? DSColors.accent.opacity(0.1) : DSColors.surface2)
+                .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous)
+                        .stroke(isSelected ? DSColors.accent : DSColors.border, lineWidth: isSelected ? 2 : 1)
+                )
             }
-            .padding(DSSpacing.m)
-            .background(
-                flowState.valuationAssumptions.terminalMethod == method
-                    ? DSColors.accent.opacity(0.1)
-                    : (method == .exitMultiple ? DSColors.surface2.opacity(0.5) : DSColors.surface2)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous)
-                    .stroke(
-                        flowState.valuationAssumptions.terminalMethod == method
-                            ? DSColors.accent
-                            : DSColors.border,
-                        lineWidth: flowState.valuationAssumptions.terminalMethod == method ? 2 : 1
-                    )
-            )
+            .buttonStyle(.plain)
+
+            // Exit-multiple stepper, shown only when that method is active.
+            if method == .exitMultiple, isSelected {
+                exitMultipleStepper
+                    .padding(.top, DSSpacing.s)
+            }
         }
-        .buttonStyle(.plain)
-        .disabled(method == .exitMultiple)
+    }
+
+    private var exitMultipleStepper: some View {
+        let value = flowState.valuationAssumptions.exitMultiple ?? DCFEngine.defaultExitMultiple
+        return HStack {
+            Text("Exit multiple")
+                .font(DSTypography.body)
+                .foregroundColor(DSColors.textSecondary)
+            Spacer()
+            Button {
+                flowState.valuationAssumptions.exitMultiple = max(1.0, value - 1.0)
+            } label: {
+                Image(systemName: "minus.circle.fill").font(.system(size: 22)).foregroundColor(DSColors.accent)
+            }
+            .buttonStyle(.plain)
+            Text(String(format: "%.0f×", value))
+                .font(DSTypography.numericHeadline)
+                .foregroundColor(DSColors.textPrimary)
+                .frame(minWidth: 52)
+            Button {
+                flowState.valuationAssumptions.exitMultiple = min(40.0, value + 1.0)
+            } label: {
+                Image(systemName: "plus.circle.fill").font(.system(size: 22)).foregroundColor(DSColors.accent)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, DSSpacing.m)
+        .padding(.vertical, DSSpacing.s)
+        .background(DSColors.surface2)
+        .clipShape(RoundedRectangle(cornerRadius: DSSpacing.radiusStandard, style: .continuous))
     }
     
     // MARK: - Advanced Controls

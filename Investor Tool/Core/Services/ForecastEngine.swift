@@ -1,5 +1,13 @@
 import Foundation
 
+/// ⚠️ LEGACY — NOT the valuation engine.
+///
+/// A simplified **exit-multiple** projection (enterprise value = revenue × exit
+/// multiple, with NO discounting) used only by the legacy `ForecastViewModel` /
+/// `SensitivityEngine` preview screens. It is **not a DCF** and must not be
+/// presented as one. The real discounted-cash-flow valuation — per-year
+/// discounting + terminal value — lives in `DCFEngine` and drives the main
+/// 7-step flow + `DCFFlowState`. Retained only so older preview views compile.
 enum ForecastEngine {
     static func forecast(
         ticker: Ticker,

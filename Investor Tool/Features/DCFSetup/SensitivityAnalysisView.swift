@@ -254,14 +254,10 @@ struct SensitivityAnalysisView: View {
     private func adjustmentLabel(_ adjustment: Double) -> String {
         if adjustment == 0.0 {
             return "Base Case"
-        } else if selectedVariable == .discountRate || selectedVariable == .terminalGrowth {
-            // For rates, use point adjustments
-            let points = adjustment / 10.0 // Convert percentage to points
-            return String(format: "%+.1f pts", points)
-        } else {
-            // For percentages
-            return String(format: "%+.0f%%", adjustment)
         }
+        // All 1D variables now flex by the same relative %, so "±N%" means the
+        // same thing on every row.
+        return String(format: "%+.0f%%", adjustment)
     }
     
     // MARK: - 2D Content
@@ -446,11 +442,9 @@ struct SensitivityAnalysisView: View {
         case .operatingMargin:
             adjustedOperating.operatingMargin = flowState.operatingAssumptions.operatingMargin * (1.0 + adjustment / 100.0)
         case .discountRate:
-            let points = adjustment / 10.0
-            adjustedValuation.discountRate = flowState.valuationAssumptions.discountRate + points
+            adjustedValuation.discountRate = flowState.valuationAssumptions.discountRate * (1.0 + adjustment / 100.0)
         case .terminalGrowth:
-            let points = adjustment / 10.0
-            adjustedValuation.terminalGrowth = flowState.valuationAssumptions.terminalGrowth + points
+            adjustedValuation.terminalGrowth = flowState.valuationAssumptions.terminalGrowth * (1.0 + adjustment / 100.0)
         }
         
         // Calculate intrinsic value with adjusted parameters
@@ -503,21 +497,23 @@ struct SensitivityAnalysisView: View {
         operating: OperatingAssumptions,
         valuation: ValuationAssumptions
     ) -> Double {
-        // Calculate FCF index
-        var fcfMarginApprox = max(0, operating.operatingMargin * (1.0 - operating.taxRate / 100.0) - operating.capexPercent - operating.workingCapitalPercent) / 100.0
-        fcfMarginApprox = min(max(fcfMarginApprox, 0.0), 0.35)
-        let fcfIndex = min(max(revenueIndex * fcfMarginApprox, 0.0), 120.0)
-        
-        // Calculate intrinsic value
-        let baseScale = 1.2
-        let pvFactor = 1.0 / max(0.01, valuation.discountRate / 100.0)
-        let terminalFactor = 1.0 / max(0.01, (valuation.discountRate - valuation.terminalGrowth) / 100.0)
-        
-        let forecastPV = fcfIndex * baseScale * 0.9 * pvFactor
-        let terminalPV = fcfIndex * baseScale * 0.6 * terminalFactor
-        let intrinsic = forecastPV + terminalPV
-        
-        return min(max(intrinsic, 20.0), 800.0)
+        // FCF index — identical to DCFFlowState.derivedFreeCashFlowIndex.
+        var fcfMargin = max(0, operating.operatingMargin * (1.0 - operating.taxRate / 100.0) - operating.capexPercent - operating.workingCapitalPercent) / 100.0
+        fcfMargin = min(max(fcfMargin, 0.0), 0.35)
+        let fcfIndex = min(max(revenueIndex * fcfMargin, 0.0), 120.0)
+
+        // Run the SAME discounted-cash-flow engine and horizon the Results screen
+        // uses, so the sensitivity grid reconciles with the headline valuation
+        // instead of drifting from a separate approximation.
+        return DCFEngine.discountedValuation(
+            revenueIndex: revenueIndex,
+            fcfIndex: fcfIndex,
+            horizonYears: flowState.investmentLens.horizon.years,
+            discountRate: valuation.discountRate,
+            terminalGrowth: valuation.terminalGrowth,
+            terminalMethod: valuation.terminalMethod,
+            exitMultiple: valuation.exitMultiple
+        ).intrinsic
     }
     
     // MARK: - Bottom Bar

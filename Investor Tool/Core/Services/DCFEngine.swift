@@ -78,7 +78,9 @@ struct DCFEngine {
             fcfIndex: clampedFCFIndex,
             horizonYears: inputs.horizonYears,
             discountRate: inputs.valuation.discountRate,
-            terminalGrowth: inputs.valuation.terminalGrowth
+            terminalGrowth: inputs.valuation.terminalGrowth,
+            terminalMethod: inputs.valuation.terminalMethod,
+            exitMultiple: inputs.valuation.exitMultiple
         )
         let intrinsicValue = breakdown.intrinsic
 
@@ -113,12 +115,18 @@ struct DCFEngine {
     /// Gordon-growth terminal value discounted back, and reports the present-value
     /// split. Magnitudes are illustrative (no real per-share financials), but the
     /// mechanics and sensitivities are real.
+    /// Default FCF exit multiple used when the exit-multiple method is selected
+    /// without an explicit multiple.
+    static let defaultExitMultiple = 15.0
+
     static func discountedValuation(
         revenueIndex: Double,
         fcfIndex: Double,
         horizonYears: Int,
         discountRate: Double,
-        terminalGrowth: Double
+        terminalGrowth: Double,
+        terminalMethod: TerminalMethod = .perpetuity,
+        exitMultiple: Double? = nil
     ) -> ValuationBreakdown {
         let n = max(1, horizonYears)
         let r = max(0.01, discountRate / 100.0)
@@ -142,8 +150,15 @@ struct DCFEngine {
             finalYearFCF = fcf
         }
 
-        // Gordon-growth terminal value on the final-year FCF, discounted to today.
-        let terminalValue = finalYearFCF * (1.0 + g) / spread
+        // Terminal value on the final-year FCF, discounted to today. Either a
+        // Gordon-growth perpetuity or a simple FCF exit multiple.
+        let terminalValue: Double
+        switch terminalMethod {
+        case .perpetuity:
+            terminalValue = finalYearFCF * (1.0 + g) / spread
+        case .exitMultiple:
+            terminalValue = finalYearFCF * max(exitMultiple ?? defaultExitMultiple, 0.1)
+        }
         let pvTerminal = terminalValue / pow(1.0 + r, Double(n))
 
         let total = max(pvForecast + pvTerminal, 0.0)
