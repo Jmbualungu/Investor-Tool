@@ -1,20 +1,20 @@
-# Investor Tool (Valtyde) — iOS SwiftUI App
+# Valtyde — iOS SwiftUI App
 
 ## Quick Start
 1) Open in Xcode
 - Open Xcode.
 - Choose **File → Open** and select the folder: `Investor Tool`.
-- Open `Investor Tool.xcodeproj`.
+- Open `Valtyde.xcodeproj`.
 
 2) Select iPhone simulator and run
 - In the top toolbar, select a simulator device (e.g. **iPhone 16**).
-- Ensure the scheme is **Investor Tool**.
+- Ensure the scheme is **Valtyde**.
 - Press **Run** (▶︎) or `⌘R`.
 
 3) Run on a physical device (signing steps)
 - Connect your iPhone via USB or ensure it’s paired over Wi‑Fi.
 - In Xcode, select your device from the toolbar.
-- Go to **Signing & Capabilities** for the `Investor Tool` target.
+- Go to **Signing & Capabilities** for the `Valtyde` target.
 - Set **Team** to your Apple ID or a paid team.
 - Ensure **Bundle Identifier** is unique (e.g. `com.example.Valtyde.yourname`).
 - Xcode will prompt to enable developer mode on device if needed.
@@ -26,7 +26,7 @@
   - Location: **Signing & Capabilities** → Bundle Identifier.
 
 - **Missing scheme**
-  - Fix: In Xcode, go to **Product → Scheme → Manage Schemes** and ensure `Investor Tool` is shared.
+  - Fix: In Xcode, go to **Product → Scheme → Manage Schemes** and ensure `Valtyde` is shared.
   - If needed: close/reopen the project.
 
 - **Build failures due to Derived Data**

@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Build, install, and launch Valtyde (Investor Tool) on the iOS Simulator.
+# Build, install, and launch Valtyde on the iOS Simulator.
 # One command: builds from this repo, installs a fresh copy, launches it.
 
 set -euo pipefail
 
 # Resolve repo dir from this script's location (no hard-coded paths).
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_NAME="Investor Tool.xcodeproj"
-SCHEME="Investor Tool"
-BUNDLE_ID="com.jamesmbualungu.InvestorTool"
+PROJECT_NAME="Valtyde.xcodeproj"
+SCHEME="Valtyde"
+BUNDLE_ID="com.jamesmbualungu.Valtyde"
 DERIVED="$PROJECT_DIR/build"
 
 cd "$PROJECT_DIR"

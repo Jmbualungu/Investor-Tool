@@ -5,8 +5,8 @@
 
 set -e  # Exit on error
 
-PROJECT_PATH="/Users/jamesmbualungu/Desktop/Coding/Investor Tool/Investor Tool.xcodeproj"
-SCHEME_NAME="Investor Tool"
+PROJECT_PATH="/Users/jamesmbualungu/Desktop/Coding/Investor Tool/Valtyde.xcodeproj"
+SCHEME_NAME="Valtyde"
 BUILD_STAMP="RH-UI-2026-01-20"
 
 echo "🧹 Starting clean build process..."

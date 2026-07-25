@@ -11,10 +11,10 @@ Real accounts now point at the **forecastai** project (`rkfavupthyhadwpocyql`).
 Two things to finish so the full auth flow works:
 
 1. **Redirect allow-list (needed for the "Forgot password" deep link).**
-   The app sends a reset link with `redirectTo = augur://auth-callback`. Add it
+   The app sends a reset link with `redirectTo = valtyde://auth-callback`. Add it
    to the project's allow-list. Either:
    - Dashboard: Supabase → **Authentication → URL Configuration** → add
-     `augur://auth-callback` under **Redirect URLs**, and set **Site URL** to
+     `valtyde://auth-callback` under **Redirect URLs**, and set **Site URL** to
      `https://jmbualungu.github.io/Investor-Tool/`. **Save.**
    - Or run this (paste your token — get it at
      https://supabase.com/dashboard/account/tokens):
@@ -23,7 +23,7 @@ Two things to finish so the full auth flow works:
      curl -s -X PATCH "https://api.supabase.com/v1/projects/rkfavupthyhadwpocyql/config/auth" \
        -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
        -H "Content-Type: application/json" \
-       -d '{"site_url":"https://jmbualungu.github.io/Investor-Tool/","uri_allow_list":"augur://auth-callback"}'
+       -d '{"site_url":"https://jmbualungu.github.io/Investor-Tool/","uri_allow_list":"valtyde://auth-callback"}'
      ```
 2. **Email confirmation** is ON (Supabase default) — new users get a confirm
    email before they can sign in. That's fine for launch. If you'd rather skip
@@ -48,7 +48,7 @@ If you bump the version later: set `MARKETING_VERSION` (e.g. 1.0.1) and
 ## 2. Create the app record in App Store Connect (you)
 1. https://appstoreconnect.apple.com → **Apps → +** → New App.
 2. Platform iOS; Name **Valtyde** (see `LISTING.md` for the exact strings);
-   Primary language English (U.S.); Bundle ID `com.jamesmbualungu.InvestorTool`
+   Primary language English (U.S.); Bundle ID `com.jamesmbualungu.Valtyde`
    (register it in the Developer portal first if it's not in the dropdown);
    SKU `valtyde-ios`.
 3. Fill the listing from `LISTING.md` (subtitle, description, keywords,
@@ -66,7 +66,7 @@ agent cannot produce a distribution build. In Xcode:
 
 1. Xcode → **Settings → Accounts** → make sure the Apple ID that owns team
    **M3F8AR88HZ** is added (this is the account your Developer Program is under).
-2. Select the **Investor Tool** scheme → destination **Any iOS Device (arm64)**.
+2. Select the **Valtyde** scheme → destination **Any iOS Device (arm64)**.
 3. **Product → Archive.** Xcode auto-creates the Distribution cert + App Store
    provisioning profile for M3F8AR88HZ the first time.
 
@@ -74,7 +74,7 @@ agent cannot produce a distribution build. In Xcode:
 Once the distribution cert/profile exist in Xcode, you can script it:
 ```sh
 cd "/Users/jamesmbualungu/Developer/Repos/Investor Tool"
-xcodebuild -scheme "Investor Tool" -configuration Release \
+xcodebuild -scheme "Valtyde" -configuration Release \
   -destination 'generic/platform=iOS' -archivePath build/Valtyde.xcarchive archive
 xcodebuild -exportArchive -archivePath build/Valtyde.xcarchive \
   -exportOptionsPlist app-store/ExportOptions.plist -exportPath build/export
